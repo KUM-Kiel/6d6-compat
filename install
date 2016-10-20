@@ -1,0 +1,4 @@
+#!/bin/bash
+install -d $1
+install -m 4755 -o root build/6d6copy $1
+install build/6d6read $1
