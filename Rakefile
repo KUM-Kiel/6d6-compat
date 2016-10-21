@@ -11,7 +11,7 @@ C.library 'utime', ['utime.c']
 C.library 'bcd', ['bcd_diff.c', 'bcd_mjd.c', 'bcd_parse.c', 'bcd_valid.c', 'bcd_weekday.c']
 
 C.program '6d6copy', [
-  '6d6copy.c', 'lib6d6.a', 'libblockreader.a', 'liboptions.a', '-lpthread', '-lm'
+  '6d6copy.c', 'lib6d6.a', 'liboptions.a', '-lm'
 ]
 
 C.program '6d6read', [

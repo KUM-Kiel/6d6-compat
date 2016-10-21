@@ -3,16 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 #include "6d6.h"
 #include "bcd.h"
 #include "number.h"
 #include "options.h"
 #include "s2x.h"
 #include "s2x_channel.h"
+#include "version.h"
 
 static const char *program = "6d6read";
 static void help(const char *arg)
 {
+  fprintf(stderr, "Version %s (%s)\n",
+    KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
   fprintf(stderr, "Usage: %s [-q|--no-progress] < in.6d6 > out.s2x\n", program);
   exit(1);
 }
@@ -65,9 +70,9 @@ static int64_t bcd2gps(void *bcd)
 
 static const char *mcs_channels[] = {
   "Hydrophone H",
-  "Geophone X",
-  "Geophone Y",
-  "Geophone Z"
+  "Seismometer X",
+  "Seismometer Y",
+  "Seismometer Z"
 };
 
 int main(int argc, char **argv)
@@ -77,8 +82,9 @@ int main(int argc, char **argv)
   FILE *input = stdin, *output = stdout;
   s2x_channel *channels[KUM_6D6_MAX_CHANNEL_COUNT];
   uint8_t block[512], x[16];
+  char str[512];
   uint32_t i, j;
-  int c;
+  int c, e;
   int64_t start_time, sync_time, skew_time = 0;
   int32_t skew = 0;
   /* Block parser. */
@@ -94,22 +100,44 @@ int main(int argc, char **argv)
   ));
 
   /* Set input/output files. */
-  if (isatty(0) || isatty(1)) {
-    help(0);
-    return 1;
+  if (isatty(0)) {
+    if (argc == 2) {
+      input = fopen(argv[1], "rb");
+      if (!input) {
+        e = errno;
+        snprintf(str, sizeof(str), "/dev/%s", argv[1]);
+        input = fopen(str, "rb");
+        if (!input) {
+          fprintf(stderr, "Could not open '%s': %s.\n", argv[1], strerror(e));
+          exit(1);
+        }
+      }
+    } else {
+      help(0);
+    }
   }
-  /* TODO */
+
+  if (isatty(1)) {
+    help(0);
+  }
+
+  /* Drop root privileges if we had any. */
+  setuid(getuid());
 
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {
-    fprintf(stderr, "Malformed 6D6 start header\n");
-    exit(1);
+    read_block(block, input);
+    if (kum_6d6_header_read(&h_start, block) == -1) {
+      fprintf(stderr, "Malformed 6D6 start header\n");
+      exit(1);
+    }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
     fprintf(stderr, "Malformed 6D6 end header\n");
     exit(1);
   }
+
   /* Calculate times. */
   start_time = bcd2gps(h_start.start_time);
   sync_time = bcd2gps(h_start.sync_time);

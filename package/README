@@ -1,0 +1,35 @@
+# Install
+
+Just type
+
+  $ sudo make install
+
+This will install the Software to /usr/local/bin.
+
+Now you have the following commands.
+
+## 6d6copy
+
+  Copy a SD card to tho file system.
+
+  Use it as follows:
+
+    $ 6d6copy /dev/sdX1 file.6d6
+
+  This will copy the contents of /dev/sdX1 to file.6d6.
+  Replace X with the proper drive letter.
+  On some systems this could also be /dev/mmcblk0p1 or similar.
+
+## 6d6read
+
+  Convert a .6d6 file to .s2x.
+
+  Use it as follows:
+
+    $ 6d6read < in.6d6 > out.s2x
+
+  Note the angle brackets! The are important!
+
+  This converts the input .6d6 file to .s2x.
+
+  With this format you probably have to correct the skew manually with the Send2X tools!
