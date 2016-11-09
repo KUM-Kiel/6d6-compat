@@ -56,7 +56,7 @@ int main(int argc, char **argv)
   l = fread(buffer, 1, sizeof(buffer), infile);
   if (l < 1024 || kum_6d6_header_read(start_header, buffer) || kum_6d6_header_read(end_header, buffer + 512)) {
     /* Try to skip first 512 bytes. */
-    if (l > 3 * 512 &&
+    if (l >= 3 * 512 &&
       kum_6d6_header_read(start_header, buffer + 512) == 0 &&
       kum_6d6_header_read(end_header, buffer + 1024) == 0) {
       offset = 512;

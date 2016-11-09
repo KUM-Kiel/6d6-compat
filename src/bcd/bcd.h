@@ -37,3 +37,6 @@ extern int bcd_weekday(const char *bcd);
 
 /* Returns the days since 1.1.2000. */
 extern long bcd_mjd(const char *bcd);
+
+/* Format a BCD encoded time for display. */
+extern int bcd_format(const char *bcd, char *output, int maxlen);
