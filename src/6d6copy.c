@@ -13,7 +13,35 @@ static void help(const char *arg)
 {
   fprintf(stderr, "Version %s (%s)\n",
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stderr, "Usage: %s [-q|--no-progress] /dev/sdX1 out.6d6\n", program);
+  fprintf(stderr,
+    "Usage: %s [-q|--no-progress] /dev/sdX1 out.6d6\n"
+    "\n"
+    "The program '6d6copy' makes a perfect copy of a StiK or 6D6 SD card\n"
+    "to a file.\n"
+    "This is a great backup mechanism and you can use the .6d6 files as a\n"
+    "starting point for arbitrary data analysis methods.\n"
+    "\n"
+    "The first argument is the source of the data. This is normally your\n"
+    "StiK or SD card device like '/dev/sdb1' or '/dev/mmcblk0p1'.\n"
+    "The second argument is the file to which the copy will be made.\n"
+    "This file should have a .6d6 ending to identify it as 6D6 raw data.\n"
+    "\n"
+    "When you start the program and the input and output files are valid,\n"
+    "the copy operation begins and the progress is shown on the terminal.\n"
+    "To suppress that progress display you can use the flags '-q' or\n"
+    "'--no-progress'. This might be useful in automated scripts.\n"
+    "\n"
+    "Examples\n"
+    "--------\n"
+    "\n"
+    "Archive the StiK in '/dev/sdb1' to a backup hard drive.\n"
+    "\n"
+    "  $ 6d6copy /dev/sdb1 /media/Backup/Experiment-003/Station-007.6d6\n"
+    "\n"
+    "Copy the SD card in '/dev/mmcblk0p1' to the current directory.\n"
+    "\n"
+    "  $ 6d6copy /dev/mmcblk0p1 Station-013.6d6\n",
+    program);
   exit(1);
 }
 

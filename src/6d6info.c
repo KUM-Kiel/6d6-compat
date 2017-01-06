@@ -18,7 +18,22 @@ static void help(const char *arg)
   fprintf(stderr,
     "Usage: %s /dev/sdX1\n"
     "\n"
-    "Shows some information about the 6D6 recording.\n",
+    "The program '6d6info' shows some information about a 6D6 recording.\n"
+    "You can either use it on a StiK or SD card or to get some information\n"
+    "about a .6d6 file on your hard drive.\n"
+    "\n"
+    "The parameter is the file or device you want to inspect.\n"
+    "\n"
+    "Examples\n"
+    "--------\n"
+    "\n"
+    "Inspect the StiK in '/dev/sdb1':\n"
+    "\n"
+    "  $ 6d6info /dev/sdb1\n"
+    "\n"
+    "Inspect the file 'station-007.6d6' in the directory 'line-001':\n"
+    "\n"
+    "  $ 6d6info line-001/station-007.6d6\n",
     program);
   exit(1);
 }

@@ -18,7 +18,34 @@ static void help(const char *arg)
 {
   fprintf(stderr, "Version %s (%s)\n",
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stderr, "Usage: %s [-q|--no-progress] < in.6d6 > out.s2x\n", program);
+  fprintf(stderr,
+    "Usage: %s [-q|--no-progress] < in.6d6 > out.s2x\n"
+    "\n"
+    "The program '6d6read' is used to convert raw data from th 6D6 datalogger\n"
+    "into the Send2X format.\n"
+    "This is useful if you still have a lot of old dataloggers and want to use\n"
+    "a uniform method of data analysis.\n"
+    "\n"
+    "The input file is a .6d6 file and is written with an opening angle bracket '<'.\n"
+    "The output file will be a .s2x file and is preceded by a closing angle\n"
+    "bracket '>'.\n"
+    "\n"
+    "If the input file is a valid .6d6 file, the conversion process will begin and\n"
+    "the progress will be reported to the terminal. If you want to suppress the\n"
+    "progress display, you can use the flag '-q' or '--no-progress'. This might be\n"
+    "useful in automated scripts.\n"
+    "\n"
+    "Examples\n"
+    "--------\n"
+    "\n"
+    "Convert the file 'station-007.6d6' to Send2X format:\n"
+    "\n"
+    "  $ 6d6read < station-007.6d6 > station-007.s2x\n"
+    "\n"
+    "Convert the file 'x.6d6' to 'y.s2x' and suppress the progress display:\n"
+    "\n"
+    "  $ 6d6read --no-progress < x.6d6 > y.s2x\n",
+    program);
   exit(1);
 }
 
