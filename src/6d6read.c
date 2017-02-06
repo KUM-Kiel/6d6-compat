@@ -21,7 +21,7 @@ static void help(const char *arg)
   fprintf(stderr,
     "Usage: %s [-q|--no-progress] < in.6d6 > out.s2x\n"
     "\n"
-    "The program '6d6read' is used to convert raw data from th 6D6 datalogger\n"
+    "The program '6d6read' is used to convert raw data from the 6D6 datalogger\n"
     "into the Send2X format.\n"
     "This is useful if you still have a lot of old dataloggers and want to use\n"
     "a uniform method of data analysis.\n"
