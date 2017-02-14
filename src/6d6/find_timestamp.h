@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 /* Find the next timestamp in the given 6d6 file.
- * Pass framm_border = 1, if the file pointer is positioned at the beginning
+ * Pass frame_border = 1, if the file pointer is positioned at the beginning
  + of a frame in the file.
  + Stores the time and offset in the supplied fields and returns zero unless
  + there was an error. */

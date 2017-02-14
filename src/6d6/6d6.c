@@ -3,8 +3,8 @@
 #include <string.h>
 #include "number.h"
 
-#define X ((uint8_t *) x)
-#define SX ((char *) x)
+#define X ((const uint8_t *) x)
+#define SX ((const char *) x)
 #define ADV_O(a) o += (a); if (o >= 512) return -1
 #define SKIP0() while (!X[o]) { ADV_O(1); }
 
