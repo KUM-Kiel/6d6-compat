@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <inttypes.h>
 #include "6d6.h"
 #include "bcd.h"
 #include "options.h"
@@ -142,6 +143,13 @@ int main(int argc, char **argv)
   printf(" Start Time: %s\n", buffer);
   bcd_format((char *) end_header->start_time, buffer, sizeof(buffer));
   printf("   End Time: %s\n", buffer);
+  bcd_format((char *) start_header->sync_time, buffer, sizeof(buffer));
+  printf("  Sync Time: %s\n", buffer);
+  if (end_header->sync_type == KUM_6D6_SKEW) {
+    bcd_format((char *) end_header->sync_time, buffer, sizeof(buffer));
+    printf("  Skew Time: %s\n", buffer);
+    printf("       Skew: %" PRId64 "µs\n", end_header->skew);
+  }
   format_duration(bcd_diff((char *) start_header->start_time, (char *) end_header->start_time), buffer, sizeof(buffer));
   printf("   Duration: %s\n", buffer);
   printf("Sample Rate: %d SPS\n", start_header->sample_rate);
