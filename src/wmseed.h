@@ -300,13 +300,17 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
     return 0;
   } else if (sample_number <= w->last_sn || t <= w->last_t) {
     return -1;
-  } else if (sample_number - w->last_sn < 10000) {
+  }
+
+  if (sample_number - w->last_sn < 1008 * 20) {
     // Don't use too many timestamps.
     return 0;
   }
 
+  // Use linear interpolation.
   a = (double) (t - w->last_t) / (sample_number - w->last_sn);
 
+  // Check for a cut between the two timestamps.
   if (w->cut && wmseed__div(w->last_t, w->cut) != wmseed__div(t, w->cut)) {
     split_time = wmseed__div(t, w->cut) * w->cut;
     split = w->last_sn + (int64_t) ceil((split_time - w->last_t) / a);
@@ -328,6 +332,10 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
       wmseed__new_record(w, tt);
     }
   }
+
+  // Update state.
+  w->last_t = t;
+  w->last_sn = sample_number;
 
   return 0;
 }
