@@ -105,6 +105,11 @@ int main(int argc, char **argv)
   /* Drop root privileges if we had any. */
   setuid(getuid());
 
+  if (!station || strlen(station) <= 0 || strlen(station) > 5) {
+    fprintf(stderr, "Please specify a station code of 1 to 5 characters with --station=code.\n");
+    return 1;
+  }
+
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
