@@ -28,6 +28,9 @@ int miniseed_record_set_sample_rate(MiniSeedRecord *r, double sample_rate);
 // Push a sample to the record. Returns -1 if the record is full.
 int miniseed_record_push_sample(MiniSeedRecord *r, int32_t sample);
 
+// Mark a record as containing a leap second.
+int miniseed_record_set_leapsec(MiniSeedRecord *r, int leapsec);
+
 #endif
 
 #ifdef MINISEED_IMPLEMENTATION
@@ -149,6 +152,16 @@ int miniseed_record_push_sample(MiniSeedRecord *r, int32_t sample)
   num_samples += 1;
   r->data[30] = num_samples >> 8;
   r->data[31] = num_samples;
+  return 0;
+}
+
+int miniseed_record_set_leapsec(MiniSeedRecord *r, int leapsec)
+{
+  if (!r) return -1;
+  r->data[36] &= ~0x30;
+  if (leapsec) {
+    r->data[36] |= leapsec > 0 ? 0x10 : 0x20;
+  }
   return 0;
 }
 

@@ -14,7 +14,9 @@ typedef struct {
   double sample_rate;
   Samplebuffer *sb;
   int record_number;
+  Time record_time;
   MiniSeedRecord record[1];
+  int data_pending;
   FILE *output;
   Time last_t;
   int64_t last_sn;
@@ -214,7 +216,9 @@ WMSeed *wmseed_new(const char *template, const char *station, const char *locati
   w->network = wmseed__strdup(network);
   w->sample_rate = sample_rate;
   w->sb = samplebuffer_new();
-  w->record_number = 1;
+  w->record_number = 0;
+  w->record_time = 0;
+  w->data_pending = 0;
   w->output = 0;
   w->last_t = 0;
   w->last_sn = -1;
@@ -246,10 +250,30 @@ int wmseed_sample(WMSeed *w, int32_t sample)
   return 0;
 }
 
+static void wmseed__flush(WMSeed *w)
+{
+  if (w->data_pending) {
+    if (fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
+      fprintf(stderr, "I/O error!\n");
+      fflush(stderr);
+      exit(1);
+    }
+    w->data_pending = 0;
+  }
+}
+
 static void wmseed__new_record(WMSeed *w, Time t)
 {
   Date d;
+  if (w->data_pending) {
+    if (tai_utc_diff(w->record_time) != tai_utc_diff(t)) {
+      miniseed_record_set_leapsec(w->record, 1);
+    }
+    wmseed__flush(w);
+  }
   w->record_number += 1;
+  w->record_time = t;
+  w->data_pending = 0;
   miniseed_record_init(w->record, w->record_number);
   miniseed_record_set_info(w->record, w->station, w->location, w->channel, w->network);
   miniseed_record_set_sample_rate(w->record, w->sample_rate);
@@ -260,6 +284,8 @@ static void wmseed__new_record(WMSeed *w, Time t)
 static void wmseed__create_file(WMSeed *w, Time t)
 {
   char *filename, *dirname;
+  w->record_number = 0;
+  wmseed__new_record(w, t);
   if (w->output) {
     fclose(w->output);
   }
@@ -276,8 +302,6 @@ static void wmseed__create_file(WMSeed *w, Time t)
     fprintf(stderr, "Created file '%s'.\n", filename);
   }
   free(filename);
-  w->record_number = 0;
-  wmseed__new_record(w, t);
 
 }
 
@@ -286,7 +310,7 @@ static void wmseed__create_file(WMSeed *w, Time t)
 
 int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
 {
-  int64_t split = -1;
+  int64_t split = -1, off;
   int32_t sample;
   double a;
   Time tt, split_time = 0;
@@ -311,9 +335,13 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
   a = (double) (t - w->last_t) / (sample_number - w->last_sn);
 
   // Check for a cut between the two timestamps.
-  if (w->cut && wmseed__div(w->last_t, w->cut) != wmseed__div(t, w->cut)) {
-    split_time = wmseed__div(t, w->cut) * w->cut;
+  // Calculate UTC offset to cut at round UTC dates and times.
+  off = 1000000 * tai_utc_diff(t);
+  if (w->cut && wmseed__div(w->last_t - off, w->cut) != wmseed__div(t - off, w->cut)) {
+    split_time = wmseed__div(t - off, w->cut) * w->cut + off;
     split = w->last_sn + (int64_t) ceil((split_time - w->last_t) / a);
+    //printf("%lld\n", (long long) split);
+    //fflush(stdout);
   }
 
   while (w->sb->len && w->sb->sample_number <= sample_number) {
@@ -323,14 +351,10 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
     }
     sample = samplebuffer_pop(w->sb);
     while (miniseed_record_push_sample(w->record, sample) == -1) {
-      if (fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
-        fprintf(stderr, "I/O error!\n");
-        fflush(stderr);
-        exit(1);
-      }
       tt = w->last_t + (int64_t) round((w->sb->sample_number - w->last_sn - 1) * a);
       wmseed__new_record(w, tt);
     }
+    w->data_pending = 1;
   }
 
   // Update state.

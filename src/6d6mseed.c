@@ -65,6 +65,8 @@ int main(int argc, char **argv)
   uint32_t i, j;
   int c, e;
   Time start_time, sync_time, skew_time = 0, t;
+  double skew = 1;
+  int have_skew = 0;
   /* Block parser. */
   int pos, remaining = 0, have_time = 0;
   int32_t frame[KUM_6D6_MAX_CHANNEL_COUNT];
@@ -125,10 +127,16 @@ int main(int argc, char **argv)
   }
 
   /* Calculate times. */
-  start_time = bcd_time(h_start.start_time);
   sync_time = bcd_time(h_start.sync_time);
-  if (h_end.sync_type == KUM_6D6_SKEW) {
+  start_time = bcd_time(h_start.start_time);
+  /* Leap second between sync and start? */
+  start_time += 1000000 * (tai_utc_diff(start_time) - tai_utc_diff(sync_time));
+  if (h_end.sync_type == KUM_6D6_SKEW && bcd_valid((const char *) h_end.sync_time)) {
     skew_time = bcd_time(h_end.sync_time);
+    h_end.skew += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
+    skew = (double) (h_end.skew - h_start.skew) / (skew_time - sync_time);
+    have_skew = 1;
+    fprintf(stderr, "Using a skew of %lldµs. (%.4fppm)\n", (long long) h_end.skew, skew * 1e6);
   }
   /* Create Channels. */
   for (c = 0; c < h_start.channel_count; ++c) {
@@ -167,8 +175,8 @@ int main(int argc, char **argv)
             have_time = 1;
             for (c = 0; c < h_start.channel_count; ++c) {
               t = start_time + (frame[1] * (int64_t) 1000000);
-              if (h_end.sync_type == KUM_6D6_SKEW) {
-                t += h_start.skew + round((double) (t - sync_time) * (h_end.skew - h_start.skew) / (skew_time - sync_time));
+              if (have_skew) {
+                t += h_start.skew + round((t - sync_time) * skew);
               }
               wmseed_time(channels[c], t, sample_number);
             }
