@@ -78,3 +78,11 @@ C.program 's2xshift', [
   'libs2x.a',
   '-lm'
 ]
+
+desc "Install everything."
+task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed'] do
+  system 'sudo install -m 4755 "build/6d6info" "/usr/local/bin/"'
+  system 'sudo install -m 4755 "build/6d6copy" "/usr/local/bin/"'
+  system 'sudo install -m 0755 "build/6d6read" "/usr/local/bin/"'
+  system 'sudo install -m 4755 "build/6d6mseed" "/usr/local/bin/"'
+end
