@@ -6,9 +6,29 @@ Just type
 
 This will install the Software to /usr/local/bin.
 
+If you want to install to another directory, you can specify it like so:
+
+  $ PREFIX=/path/to/dir sudo make install
+
+Note that 'bin' will be appended to the path. The default is PREFIX=/usr/local.
+
 Now you have the following commands.
 
-## 6d6copy
+6d6info
+-------
+
+  Show info about a 6D6 file, StiK or SD card.
+
+  Use it as follows:
+
+    $ 6d6info /dev/sdX1
+
+  This will show info for /dev/sdX1.
+  Replace X with the proper drive letter.
+  On some systems this could also be /dev/mmcblk0p1 or similar.
+
+6d6copy
+-------
 
   Copy a SD card to tho file system.
 
@@ -20,7 +40,22 @@ Now you have the following commands.
   Replace X with the proper drive letter.
   On some systems this could also be /dev/mmcblk0p1 or similar.
 
-## 6d6read
+6d6mseed
+--------
+
+  Convert a .6d6 file to MiniSEED.
+
+  Use it as follows:
+
+    $ 6d6mseed --station=CODE file.6d6
+
+  This will convert file.6d6 to MiniSEED. Setting the station code is required.
+  For information about other options use the following command:
+
+    $ 6d6mseed --help
+
+6d6read
+-------
 
   Convert a .6d6 file to .s2x.
 
@@ -28,7 +63,7 @@ Now you have the following commands.
 
     $ 6d6read < in.6d6 > out.s2x
 
-  Note the angle brackets! The are important!
+  Note the angle brackets! They are important!
 
   This converts the input .6d6 file to .s2x.
 
