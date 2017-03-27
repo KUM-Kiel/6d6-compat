@@ -1,4 +1,8 @@
 /build/
+*.html
+
+/6d6-compat*/
+*.tar.gz
 
 .DS_Store
 ._*
