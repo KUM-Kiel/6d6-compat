@@ -36,7 +36,7 @@ static void help(const char *arg)
     "--station=CODE\n"
     "\n"
     "  Set the MiniSEED station code to CODE. The station code is required for\n"
-    "  MiniSEED generation. It can contain between one and fife ASCII characters.\n"
+    "  MiniSEED generation. It can contain between one and five ASCII characters.\n"
     "\n"
     "--location=CODE\n"
     "\n"
