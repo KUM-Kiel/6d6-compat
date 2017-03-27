@@ -170,7 +170,9 @@ int main(int argc, char **argv)
   sync_time = bcd2gps(h_start.sync_time);
   if (h_end.sync_type == KUM_6D6_SKEW) {
     skew_time = bcd2gps(h_end.sync_time);
-    skew = round(h_end.skew / 1000.0);
+    //skew = round(h_end.skew / 1000.0);
+    /* It seems the manual is wrong and skew is in fact in us. */
+    skew = h_end.skew;
   }
   /* Create Channels. */
   for (c = 0; c < h_start.channel_count; ++c) {
