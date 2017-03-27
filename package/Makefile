@@ -1,4 +1,4 @@
-PREFIX = /usr/local
+PREFIX ?= /usr/local
 
 install: 6d6copy 6d6read
 	@mkdir -p "$(PREFIX)/bin"
