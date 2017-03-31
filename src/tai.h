@@ -192,11 +192,33 @@ Date tai_date(Time t, int *yday, int *wday)
 }
 
 #include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
 Time tai_now(void)
 {
+#ifdef CLOCK_REALTIME
+  Time t;
   struct timespec tv;
-  clock_gettime(CLOCK_TAI, &tv);
-  return (int64_t) (tv.tv_sec - 946684800) * 1000000 + tv.tv_nsec / 1000;
+#ifdef CLOCK_TAI
+  if (clock_gettime(CLOCK_TAI, &tv) == 0) {
+    t = (int64_t) (tv.tv_sec - 946684800) * 1000000 + tv.tv_nsec / 1000;
+    // TODO: CLOCK_TAI is probably lying.
+    return t;
+  }
+#endif
+  if (clock_gettime(CLOCK_REALTIME, &tv) == 0) {
+    t = (int64_t) (tv.tv_sec - 946684800) * 1000000 + tv.tv_nsec / 1000;
+    t = tai__leapsec_add(t, 0);
+    return t;
+  }
+#endif
+  struct timeval tp;
+  if (gettimeofday(&tp, 0) == 0) {
+    t = (int64_t) (tp.tv_sec - 946684800) * 1000000 + tp.tv_usec;
+    t = tai__leapsec_add(t, 0);
+    return t;
+  }
+  return 0;
 }
 
 #ifndef NO_STDIO
