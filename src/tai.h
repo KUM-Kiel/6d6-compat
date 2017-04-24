@@ -212,8 +212,8 @@ Date tai_date(Time t, int *yday, int *wday)
 #include <unistd.h>
 Time tai_now(void)
 {
-#ifdef CLOCK_REALTIME
   Time t;
+#ifdef CLOCK_REALTIME
   struct timespec tv;
 #ifdef CLOCK_TAI
   if (clock_gettime(CLOCK_TAI, &tv) == 0) {
