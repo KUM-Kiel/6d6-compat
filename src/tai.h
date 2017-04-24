@@ -5,6 +5,7 @@
 #define TAI_INCLUDE
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef int64_t Time;
 typedef struct {
@@ -21,6 +22,9 @@ Date tai_date(Time t, int *yday, int *wday);
 Time tai_now(void);
 
 int tai_utc_diff(Time t);
+
+int tai_leapsecs_valid(Time t);
+int tai_leapsecs_need_update(Time t);
 
 #ifndef NO_STDIO
 int tai_format(char *str, size_t size, Date date);
@@ -64,6 +68,18 @@ static Time tai__leapsecs[] = {
   489024036000000,
   536544037000000,
 };
+static Time tai__last_valid = 568080037000000;
+static Time tai__next_update = 554860837000000;
+
+int tai_leapsecs_valid(Time t)
+{
+  return t < tai__last_valid;
+}
+
+int tai_leapsecs_need_update(Time t)
+{
+  return t > tai__next_update;
+}
 
 int tai_utc_diff(Time t)
 {

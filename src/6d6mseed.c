@@ -105,6 +105,53 @@ static Time bcd_time(const uint8_t *bcd)
   return tai_time(date);
 }
 
+static void print_leftpad(FILE *f, const char *s, const char *pad)
+{
+  int lf = 0;
+  while (*s) {
+    if (lf && *s != '\n') {
+      fputs(pad, f);
+      lf = 0;
+    }
+    if (*s == '\n') {
+      lf = 1;
+    }
+    fputc(*s, f);
+    ++s;
+  }
+  if (!lf) {
+    fputc('\n', f);
+  }
+}
+
+static void format_duration(char *str, size_t len, int d)
+{
+  int h, m, s;
+  size_t pos = 0;
+  s = d % 60;
+  d /= 60;
+  m = d % 60;
+  d /= 60;
+  h = d % 24;
+  d /= 24;
+  if (d) {
+    pos += snprintf(str + pos, len - pos, "%s%dd", pos == 0 ? "" : " ", d);
+    if (pos >= len) return;
+  }
+  if (h) {
+    pos += snprintf(str + pos, len - pos, "%s%dh", pos == 0 ? "" : " ", h);
+    if (pos >= len) return;
+  }
+  if (m) {
+    pos += snprintf(str + pos, len - pos, "%s%dm", pos == 0 ? "" : " ", m);
+    if (pos >= len) return;
+  }
+  if (s) {
+    pos += snprintf(str + pos, len - pos, "%s%ds", pos == 0 ? "" : " ", s);
+    if (pos >= len) return;
+  }
+}
+
 int main(int argc, char **argv)
 {
   kum_6d6_header h_start, h_end;
@@ -112,9 +159,11 @@ int main(int argc, char **argv)
   WMSeed *channels[KUM_6D6_MAX_CHANNEL_COUNT];
   uint8_t block[512];
   char str[512];
+  const char *filename = "-";
   uint32_t i, j;
   int c, e;
-  Time start_time, sync_time, skew_time = 0, t;
+  Time start_time, sync_time, end_time, skew_time = 0, t;
+  Date d;
   double skew = 1;
   int have_skew = 0;
   /* Block parser. */
@@ -127,6 +176,20 @@ int main(int argc, char **argv)
   int cut = 86400;
 
   int progress = 1;
+
+  /* Check the leapsecond information. */
+  if (tai_leapsecs_need_update(tai_now())) {
+    fprintf(stderr,
+      "\n"
+      "############################################################\n"
+      "#                     !!! WARNING !!!                      #\n"
+      "#         The leapsecond information is outdated.          #\n"
+      "#         Please download the newest release here:         #\n"
+      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
+      "############################################################\n"
+      "\n");
+  }
+
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
     FLAG('p', "progress", progress, 1),
@@ -140,11 +203,13 @@ int main(int argc, char **argv)
 
   /* Set input file. */
   if (argc == 2) {
-    input = fopen(argv[1], "rb");
+    filename = argv[1];
+    input = fopen(filename, "rb");
     if (!input) {
       e = errno;
       snprintf(str, sizeof(str), "/dev/%s", argv[1]);
-      input = fopen(str, "rb");
+      filename = str;
+      input = fopen(filename, "rb");
       if (!input) {
         fprintf(stderr, "Could not open '%s': %s.\n", argv[1], strerror(e));
         exit(1);
@@ -162,23 +227,27 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  fprintf(stderr, "Processing '%s'.\n", filename);
+  fprintf(stderr, "============================================================\n");
+
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
-      fprintf(stderr, "Malformed 6D6 start header\n");
+      fprintf(stderr, "Malformed 6D6 start header!\n");
       exit(1);
     }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
-    fprintf(stderr, "Malformed 6D6 end header\n");
+    fprintf(stderr, "Malformed 6D6 end header!\n");
     exit(1);
   }
 
   /* Calculate times. */
   sync_time = bcd_time(h_start.sync_time);
   start_time = bcd_time(h_start.start_time);
+  end_time = bcd_time(h_end.start_time);
   /* Leap second between sync and start? */
   start_time += 1000000 * (tai_utc_diff(start_time) - tai_utc_diff(sync_time));
   if (h_end.sync_type == KUM_6D6_SKEW && bcd_valid((const char *) h_end.sync_time)) {
@@ -186,7 +255,6 @@ int main(int argc, char **argv)
     h_end.skew += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
     skew = (double) (h_end.skew - h_start.skew) / (skew_time - sync_time);
     have_skew = 1;
-    fprintf(stderr, "Using a skew of %lldµs. (%.4fppm)\n", (long long) h_end.skew, skew * 1e6);
   }
   /* Create Channels. */
   for (c = 0; c < h_start.channel_count; ++c) {
@@ -196,6 +264,25 @@ int main(int argc, char **argv)
       h_start.sample_rate,
       cut);
   }
+
+  fprintf(stderr, "     6D6 ID: %s\n", h_start.recorder_id);
+  fprintf(stderr, "     RTC ID: %s\n", h_start.rtc_id);
+  fprintf(stderr, "       Size: %.1fMB\n", h_end.address * 512e-6);
+  d = tai_date(start_time, 0, 0);
+  fprintf(stderr, " Start Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  d = tai_date(end_time, 0, 0);
+  fprintf(stderr, "   End Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  format_duration(str, sizeof(str), (end_time - start_time) / 1000000);
+  fprintf(stderr, "   Duration: %s\n", str);
+  if (have_skew) {
+    fprintf(stderr, "      Drift: %lldµs\n", (long long) h_end.skew);
+  }
+  fprintf(stderr, "    Comment: ");
+  print_leftpad(stderr, (const char *) h_start.comment, "             ");
+  fprintf(stderr, "============================================================\n");
+
   i = 2;
   /* Skip to start of data.
    * Can not fseek, because stream might not be seekable. */

@@ -79,6 +79,10 @@ C.program 's2xshift', [
   '-lm'
 ]
 
+C.program 'tai', [
+  'tai.c',
+]
+
 desc "Install everything."
 task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed'] do
   system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
