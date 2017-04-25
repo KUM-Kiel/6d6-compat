@@ -6,7 +6,7 @@ This is especially useful when you are in the process of migrating to the new 6D
 
 ## Installation
 
-The easiest way to install the tools is to download one of the binary releases.
+The easiest way to install the tools is to [download one of the binary releases](https://github.com/KUM-Kiel/6d6-compat/releases/latest).
 
 After extraction the programs can be installed by typing
 
