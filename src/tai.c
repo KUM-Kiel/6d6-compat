@@ -122,7 +122,7 @@ int main(int argc, char **argv)
   Date d;
   for (i = 1; i < argc; ++i) {
     if (utc_parse(argv[i], strlen(argv[i]), &d) == 0) {
-      printf("%4d-%02d-%02d %02d:%02d:%02d -> %lld\n",
+      printf("%4d-%02d-%02d %02d:%02d:%02d UTC -> %lld\n",
         d.year, d.month, d.day,
         d.hour, d.min, d.sec,
         (long long) tai_time(d));
