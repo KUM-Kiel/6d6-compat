@@ -1,7 +1,11 @@
 require 'rake/c'
 
-C.cflags = '-Wall -Os -m32 -static'
-C.ldflags = '-m32 -static'
+if RUBY_PLATFORM.match(/darwin/)
+  C.cflags = '-Wall -Os'
+else
+  C.cflags = '-Wall -Os -m32 -static'
+  C.ldflags = '-m32 -static'
+end
 
 C.library '6d6', [
   '6d6.c',
