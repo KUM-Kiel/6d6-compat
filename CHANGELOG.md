@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.2] - 2017-04-24
+### Changed
+- `6d6mseed` now prints much more information.
+- `6d6mseed` shows a warning when the leapsecond information is outdated.
+
 ## [1.2.1] - 2017-03-27
 ### Changed
 - Skew is now saved to s2x files in microseconds.
