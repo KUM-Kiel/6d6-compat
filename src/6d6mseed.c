@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 #include "6d6.h"
 #include "bcd.h"
 #include "number.h"
@@ -18,6 +19,12 @@
 #include "samplebuffer.h"
 #define WMSEED_IMPLEMENTATION
 #include "wmseed.h"
+
+static void fatal(const char *s)
+{
+  fprintf(stderr, "%s\n", s);
+  exit(1);
+}
 
 static const char *program = "6d6mseed";
 static void help(const char *arg)
@@ -63,6 +70,10 @@ static void help(const char *arg)
     "    %%N - Network\n"
     "\n"
     "  The default value is 'out/%%S/%%y-%%m-%%d-%%C.mseed'.\n"
+    "\n"
+    "--cut=SECONDS\n"
+    "\n"
+    "  Cut the data in files of SECONDS. The default value is 86400, i.e. one day.\n"
     "\n"
     "Examples\n"
     "--------\n"
@@ -157,6 +168,7 @@ int main(int argc, char **argv)
   kum_6d6_header h_start, h_end;
   FILE *input = 0;
   WMSeed *channels[KUM_6D6_MAX_CHANNEL_COUNT];
+  int n_channels;
   uint8_t block[512];
   char str[512];
   const char *filename = "-";
@@ -172,7 +184,8 @@ int main(int argc, char **argv)
   int64_t sample_number = 0;
 
   char *station = 0, *location = "", *network = "";
-  char *template = "out/%S/%y-%m-%d-%C.mseed";
+  char *template = 0;
+  char *cut_string = 0;
   int cut = 86400;
 
   int progress = 1;
@@ -198,8 +211,29 @@ int main(int argc, char **argv)
     PARAMETER(0, "station", station),
     PARAMETER(0, "location", location),
     PARAMETER(0, "network", network),
-    PARAMETER(0, "output", template)
+    PARAMETER(0, "output", template),
+    PARAMETER('c', "cut", cut_string)
   ));
+
+  if (cut_string) {
+    int n = 0;
+    while (*cut_string) {
+      if (*cut_string < '0' || *cut_string > '9') fatal("Invalid value for '--cut'.");
+      if (__builtin_mul_overflow(n, 10, &n)) fatal("Invalid value for '--cut'.");
+      if (__builtin_add_overflow(n, *cut_string - '0', &n)) fatal("Invalid value for '--cut'.");
+      ++cut_string;
+    }
+    if (n < 300 || n > 86400 * 60) fatal("Invalid value for '--cut'.");
+    cut = n;
+  }
+
+  if (!template) {
+    if (cut >= 86400) {
+      template = "out/%S/%y-%m-%d-%C.mseed";
+    } else {
+      template = "out/%S/%y-%m-%d_%h.%i.%s-%C.mseed";
+    }
+  }
 
   /* Set input file. */
   if (argc == 2) {
@@ -220,7 +254,7 @@ int main(int argc, char **argv)
   }
 
   /* Drop root privileges if we had any. */
-  setuid(getuid());
+  (void) setuid(getuid());
 
   if (!station || strlen(station) <= 0 || strlen(station) > 5) {
     fprintf(stderr, "Please specify a station code of 1 to 5 characters with --station=code.\n");
@@ -257,7 +291,9 @@ int main(int argc, char **argv)
     have_skew = 1;
   }
   /* Create Channels. */
-  for (c = 0; c < h_start.channel_count; ++c) {
+  n_channels = h_start.channel_count;
+  assert(0 <= n_channels && n_channels <= KUM_6D6_MAX_CHANNEL_COUNT);
+  for (c = 0; c < n_channels; ++c) {
     channels[c] = wmseed_new(
       template,
       station, location, (const char *) h_start.channel_names[c], network,
@@ -298,7 +334,7 @@ int main(int argc, char **argv)
     for (j = 0; j < 512; j += 4) {
       if (!remaining) {
         frame[0] = ld_i32_be(block + j);
-        remaining = (frame[0] & 1) ? 3 : (h_start.channel_count - 1);
+        remaining = (frame[0] & 1) ? 3 : (n_channels - 1);
         pos = 1;
       } else {
         frame[pos++] = ld_i32_be(block + j);
@@ -310,7 +346,7 @@ int main(int argc, char **argv)
           switch (frame[0]) {
           case 1: /* Time */
             have_time = 1;
-            for (c = 0; c < h_start.channel_count; ++c) {
+            for (c = 0; c < n_channels; ++c) {
               t = start_time + (frame[1] * (int64_t) 1000000);
               if (have_skew) {
                 t += h_start.skew + round((t - sync_time) * skew);
@@ -336,7 +372,7 @@ int main(int argc, char **argv)
           }
         } else {
           if (have_time) {
-            for (c = 0; c < h_start.channel_count; ++c) {
+            for (c = 0; c < n_channels; ++c) {
               wmseed_sample(channels[c], frame[c]);
             }
             sample_number += 1;
@@ -350,7 +386,7 @@ int main(int argc, char **argv)
     }
   }
 done:
-  for (c = 0; c < h_start.channel_count; ++c) {
+  for (c = 0; c < n_channels; ++c) {
     wmseed_destroy(channels[c]);
   }
   if (progress) {
