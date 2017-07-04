@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.3] - 2017-07-04
+### Changed
+- `6d6mseed` now has a `--cut` option to create files of different length than a day.
+
 ## [1.2.2] - 2017-04-24
 ### Changed
 - `6d6mseed` now prints much more information.
