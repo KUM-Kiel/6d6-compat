@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.2.4] - 2017-07-10
+### Added
+- macOS binaries are now available.
+
 ### Changed
 - Updated leapsecond information.
 
