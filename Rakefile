@@ -2,9 +2,11 @@ require 'rake/c'
 
 if RUBY_PLATFORM.match(/darwin/)
   C.cflags = '-Wall -Os'
+  host = "osx-64bit"
 else
   C.cflags = '-Wall -Os -m32 -static'
   C.ldflags = '-m32 -static'
+  host = "linux-i386"
 end
 
 C.library '6d6', [
@@ -104,7 +106,7 @@ task :package => [
   v = File.read 'src/version.h'
   version = v.match(/KUM_6D6_COMPAT_VERSION\s+"([^"]+)"/)[1]
   date = v.match(/KUM_6D6_COMPAT_DATE\s+"([^"]+)"/)[1]
-  archive = "6d6-compat-#{date}-#{version}-linux-i386"
+  archive = "6d6-compat-#{date}-#{version}-#{host}"
   system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
   system "rm -rf '#{archive}'"
     system "mkdir '#{archive}'"
