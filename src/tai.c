@@ -116,16 +116,42 @@ end:
   return 0;
 }
 
+static int time_parse(const char *input, int size, Time *t)
+{
+  Time tt = 0;
+  int sign = 1, i;
+  if (size > 1 && input[0] == '-') {
+    sign = -1;
+    ++input;
+    --size;
+  }
+  for (i = 0; i < size; ++i) {
+    if (input[i] < '0' || input[i] > '9' ||
+      __builtin_mul_overflow(tt, 10, &tt) ||
+      __builtin_add_overflow(tt, (input[i] - '0') * sign, &tt))
+      return -1;
+  }
+  if (t) *t = tt;
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   int i;
   Date d;
+  Time t;
   for (i = 1; i < argc; ++i) {
     if (utc_parse(argv[i], strlen(argv[i]), &d) == 0) {
       printf("%4d-%02d-%02d %02d:%02d:%02d UTC -> %lld\n",
         d.year, d.month, d.day,
         d.hour, d.min, d.sec,
         (long long) tai_time(d));
+    } else if (time_parse(argv[i], strlen(argv[i]), &t) == 0) {
+      d = tai_date(t, 0, 0);
+      printf("%lld -> %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+        (long long) t,
+        d.year, d.month, d.day,
+        d.hour, d.min, d.sec);
     }
   }
 }
