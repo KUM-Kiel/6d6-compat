@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Updated leapsecond information.
 
 ## [1.2.3] - 2017-07-04
 ### Changed
