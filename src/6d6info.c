@@ -145,7 +145,8 @@ int main(int argc, char **argv)
   printf("   End Time: %s\n", buffer);
   bcd_format((char *) start_header->sync_time, buffer, sizeof(buffer));
   printf("  Sync Time: %s\n", buffer);
-  if (end_header->sync_type == KUM_6D6_SKEW) {
+  if (end_header->sync_type == KUM_6D6_SKEW &&
+      bcd_valid((char *) end_header->sync_time)) {
     bcd_format((char *) end_header->sync_time, buffer, sizeof(buffer));
     printf("  Skew Time: %s\n", buffer);
     printf("       Skew: %" PRId64 "µs\n", end_header->skew);
