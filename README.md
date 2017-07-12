@@ -1,8 +1,14 @@
 # 6D6 Compatibility Tools
 
-This is a small collection of tools to ensure compatibility of the new 6D6 Datalogger with the old Send workflows.
+This is a small collection of tools to convert data from the new 6D6 datalogger to other formats.
 
+The main supported format is the MiniSEED format.
+It is widely accepted in the seismological community and ensures maximum compatibility with different workflows.
+
+For compatibility with SEND software, the s2x format can be used.
 This is especially useful when you are in the process of migrating to the new 6D6 Datalogger but still have a lot of old recorders and wish to use all the models side by side.
+
+As a planned feature, the implementation of the SEG-Y format is in progress.
 
 ## Installation
 
