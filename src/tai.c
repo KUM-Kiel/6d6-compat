@@ -1,4 +1,3 @@
-#define TAI_IMPLEMENTATION
 #include "tai.h"
 #include <stdio.h>
 #include <string.h>

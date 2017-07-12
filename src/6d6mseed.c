@@ -11,7 +11,6 @@
 #include "number.h"
 #include "options.h"
 #include "version.h"
-#define TAI_IMPLEMENTATION
 #include "tai.h"
 #define MINISEED_IMPLEMENTATION
 #include "miniseed.h"
@@ -116,53 +115,6 @@ static Time bcd_time(const uint8_t *bcd)
   return tai_time(date);
 }
 
-static void print_leftpad(FILE *f, const char *s, const char *pad)
-{
-  int lf = 0;
-  while (*s) {
-    if (lf && *s != '\n') {
-      fputs(pad, f);
-      lf = 0;
-    }
-    if (*s == '\n') {
-      lf = 1;
-    }
-    fputc(*s, f);
-    ++s;
-  }
-  if (!lf) {
-    fputc('\n', f);
-  }
-}
-
-static void format_duration(char *str, size_t len, int d)
-{
-  int h, m, s;
-  size_t pos = 0;
-  s = d % 60;
-  d /= 60;
-  m = d % 60;
-  d /= 60;
-  h = d % 24;
-  d /= 24;
-  if (d) {
-    pos += snprintf(str + pos, len - pos, "%s%dd", pos == 0 ? "" : " ", d);
-    if (pos >= len) return;
-  }
-  if (h) {
-    pos += snprintf(str + pos, len - pos, "%s%dh", pos == 0 ? "" : " ", h);
-    if (pos >= len) return;
-  }
-  if (m) {
-    pos += snprintf(str + pos, len - pos, "%s%dm", pos == 0 ? "" : " ", m);
-    if (pos >= len) return;
-  }
-  if (s) {
-    pos += snprintf(str + pos, len - pos, "%s%ds", pos == 0 ? "" : " ", s);
-    if (pos >= len) return;
-  }
-}
-
 int main(int argc, char **argv)
 {
   kum_6d6_header h_start, h_end;
@@ -174,8 +126,7 @@ int main(int argc, char **argv)
   const char *filename = "-";
   uint32_t i, j;
   int c, e;
-  Time start_time, sync_time, end_time, skew_time = 0, t;
-  Date d;
+  Time start_time, sync_time, skew_time = 0, t;
   double skew = 1;
   int have_skew = 0;
   /* Block parser. */
@@ -281,7 +232,6 @@ int main(int argc, char **argv)
   /* Calculate times. */
   sync_time = bcd_time(h_start.sync_time);
   start_time = bcd_time(h_start.start_time);
-  end_time = bcd_time(h_end.start_time);
   /* Leap second between sync and start? */
   start_time += 1000000 * (tai_utc_diff(start_time) - tai_utc_diff(sync_time));
   if (h_end.sync_type == KUM_6D6_SKEW && bcd_valid((const char *) h_end.sync_time)) {
@@ -301,22 +251,8 @@ int main(int argc, char **argv)
       cut);
   }
 
-  fprintf(stderr, "     6D6 ID: %s\n", h_start.recorder_id);
-  fprintf(stderr, "     RTC ID: %s\n", h_start.rtc_id);
-  fprintf(stderr, "       Size: %.1fMB\n", h_end.address * 512e-6);
-  d = tai_date(start_time, 0, 0);
-  fprintf(stderr, " Start Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
-    d.year, d.month, d.day, d.hour, d.min, d.sec);
-  d = tai_date(end_time, 0, 0);
-  fprintf(stderr, "   End Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
-    d.year, d.month, d.day, d.hour, d.min, d.sec);
-  format_duration(str, sizeof(str), (end_time - start_time) / 1000000);
-  fprintf(stderr, "   Duration: %s\n", str);
-  if (have_skew) {
-    fprintf(stderr, "      Drift: %lldµs\n", (long long) h_end.skew);
-  }
-  fprintf(stderr, "    Comment: ");
-  print_leftpad(stderr, (const char *) h_start.comment, "             ");
+  kum_6d6_show_info(stderr, &h_start, &h_end);
+
   fprintf(stderr, "============================================================\n");
 
   i = 2;

@@ -1,7 +1,10 @@
 #include "6d6.h"
 
 #include <string.h>
+#include <inttypes.h>
 #include "number.h"
+#include "bcd.h"
+#include "tai.h"
 
 #define X ((const uint8_t *) x)
 #define SX ((const char *) x)
@@ -20,11 +23,11 @@ int kum_6d6_header_read(kum_6d6_header *header, const void *x)
   memcpy(header->start_time, X + o, 6);
   ADV_O(6);
   /* Sync/Skew */
-  if (!memcmp(X + o, "sync", 4)) {
+  if (!memcmp(X + o, "sync", 4) && bcd_valid(SX + o + 4)) {
     header->sync_type = KUM_6D6_SYNC;
     memcpy(header->sync_time, X + o + 4, 6);
     header->skew = ld_i32_be(X + o + 10);
-  } else if (!memcmp(X + o, "skew", 4)) {
+  } else if (!memcmp(X + o, "skew", 4) && bcd_valid(SX + o + 4)) {
     header->sync_type = KUM_6D6_SKEW;
     memcpy(header->sync_time, X + o + 4, 6);
     header->skew = ld_i32_be(X + o + 10);
@@ -127,5 +130,121 @@ int kum_6d6_header_read(kum_6d6_header *header, const void *x)
   if (n >= sizeof(header->comment)) return -1;
   if (n) memcpy(header->comment, X + o, n);
   memset(header->comment + n, 0, sizeof(header->comment) - n);
+  return 0;
+}
+
+static int format_duration(long d, char *out, int maxlen)
+{
+  int l, n = 0;
+  long t;
+  t = d / 86400;
+  if (t) {
+    l = snprintf(out, maxlen, "%ldd", t);
+    if (l < 0) return l;
+    n += l;
+  }
+  d %= 86400;
+  t = d / 3600;
+  if (t) {
+    l = snprintf(out + n, maxlen - n, "%s%ldh", n ? " " : "", t);
+    if (l < 0) return l;
+    n += l;
+  }
+  d %= 3600;
+  t = d / 60;
+  if (t) {
+    l = snprintf(out + n, maxlen - n, "%s%ldm", n ? " " : "", t);
+    if (l < 0) return l;
+    n += l;
+  }
+  d %= 60;
+  if (d) {
+    l = snprintf(out + n, maxlen - n, "%s%lds", n ? " " : "", d);
+    if (l < 0) return l;
+    n += l;
+  }
+  return n;
+}
+
+static void print_leftpad(FILE *f, const char *s, const char *pad)
+{
+  int lf = 0;
+  while (*s) {
+    if (lf && *s != '\n') {
+      fputs(pad, f);
+      lf = 0;
+    }
+    if (*s == '\n') {
+      lf = 1;
+    }
+    fputc(*s, f);
+    ++s;
+  }
+  if (!lf) {
+    fputc('\n', f);
+  }
+}
+
+static Time bcd_time(const uint8_t *bcd)
+{
+  Date date = {
+    .year = bcd_int(bcd[BCD_YEAR]) + 2000,
+    .month = bcd_int(bcd[BCD_MONTH]),
+    .day = bcd_int(bcd[BCD_DAY]),
+    .hour = bcd_int(bcd[BCD_HOUR]),
+    .min = bcd_int(bcd[BCD_MINUTE]),
+    .sec = bcd_int(bcd[BCD_SECOND]),
+    .usec = 0
+  };
+  return tai_time(date);
+}
+
+int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end_header)
+{
+  char buffer[128];
+  Time start_time, end_time, sync_time, skew_time = 0;
+  Date d;
+  double skew = 0;
+
+  if (start_header->sync_type != KUM_6D6_SYNC) return -1;
+  /* Calculate times. */
+  sync_time = bcd_time(start_header->sync_time);
+  start_time = bcd_time(start_header->start_time);
+  end_time = bcd_time(end_header->start_time);
+  /* Leap second between sync and start end? */
+  start_time += 1000000 * (tai_utc_diff(start_time) - tai_utc_diff(sync_time));
+  end_time += 1000000 * (tai_utc_diff(end_time) - tai_utc_diff(sync_time));
+  if (end_header->sync_type == KUM_6D6_SKEW) {
+    skew_time = bcd_time(end_header->sync_time);
+    end_header->skew += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
+    skew = (double) (end_header->skew - start_header->skew) / (skew_time - sync_time);
+    skew_time += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
+  }
+
+  /* Show all the info. */
+  fprintf(f, "    6D6 S/N: %s\n", start_header->recorder_id);
+  d = tai_date(start_time, 0, 0);
+  fprintf(f, " Start Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  d = tai_date(end_time, 0, 0);
+  fprintf(f, "   End Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  d = tai_date(sync_time, 0, 0);
+  fprintf(f, "  Sync Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  if (end_header->sync_type == KUM_6D6_SKEW) {
+    d = tai_date(skew_time, 0, 0);
+    fprintf(f, "  Skew Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+      d.year, d.month, d.day, d.hour, d.min, d.sec);
+    fprintf(f, "       Skew: %" PRId64 "µs (%.3fppm)\n", end_header->skew, skew);
+  }
+  format_duration(bcd_diff((char *) start_header->start_time, (char *) end_header->start_time), buffer, sizeof(buffer));
+  fprintf(f, "   Duration: %s\n", buffer);
+  fprintf(f, "Sample Rate: %d SPS\n", start_header->sample_rate);
+  fprintf(f, "       Size: %.1f MB\n", end_header->address * 512.0 / 1e6);
+
+  fprintf(f, "    Comment: ");
+  print_leftpad(f, (char *) start_header->comment, "             ");
+
   return 0;
 }

@@ -39,64 +39,6 @@ static void help(const char *arg)
   exit(1);
 }
 
-static int format_duration(long d, char *out, int maxlen)
-{
-  int l, n = 0;
-  long t;
-  t = d / 86400;
-  if (t) {
-    l = snprintf(out, maxlen, "%ldd", t);
-    if (l < 0) return l;
-    n += l;
-  }
-  d %= 86400;
-  t = d / 3600;
-  if (t) {
-    l = snprintf(out + n, maxlen - n, "%s%ldh", n ? " " : "", t);
-    if (l < 0) return l;
-    n += l;
-  }
-  d %= 3600;
-  t = d / 60;
-  if (t) {
-    l = snprintf(out + n, maxlen - n, "%s%ldm", n ? " " : "", t);
-    if (l < 0) return l;
-    n += l;
-  }
-  d %= 60;
-  if (d) {
-    l = snprintf(out + n, maxlen - n, "%s%lds", n ? " " : "", d);
-    if (l < 0) return l;
-    n += l;
-  }
-  return n;
-}
-
-static int indent(const char *padding, const char *text, char *out, int maxlen)
-{
-  int n = 0;
-  const char *p;
-  int need_padding = 0;
-  while (*text && n < maxlen - 1) {
-    if (need_padding && *text != '\n') {
-      p = padding;
-      while (*p) {
-        out[n++] = *(p++);
-        if (n >= maxlen - 1) goto done;
-      }
-      need_padding = 0;
-    }
-    out[n++] = *text;
-    if (*text == '\n') {
-      need_padding = 1;
-    }
-    ++text;
-  }
-done:
-  out[n] = 0;
-  return n;
-}
-
 int main(int argc, char **argv)
 {
   FILE *infile;
@@ -138,26 +80,7 @@ int main(int argc, char **argv)
   }
 
   /* Show all the info. */
-  printf("    6D6 S/N: %s\n", start_header->recorder_id);
-  bcd_format((char *) start_header->start_time, buffer, sizeof(buffer));
-  printf(" Start Time: %s\n", buffer);
-  bcd_format((char *) end_header->start_time, buffer, sizeof(buffer));
-  printf("   End Time: %s\n", buffer);
-  bcd_format((char *) start_header->sync_time, buffer, sizeof(buffer));
-  printf("  Sync Time: %s\n", buffer);
-  if (end_header->sync_type == KUM_6D6_SKEW &&
-      bcd_valid((char *) end_header->sync_time)) {
-    bcd_format((char *) end_header->sync_time, buffer, sizeof(buffer));
-    printf("  Skew Time: %s\n", buffer);
-    printf("       Skew: %" PRId64 "µs\n", end_header->skew);
-  }
-  format_duration(bcd_diff((char *) start_header->start_time, (char *) end_header->start_time), buffer, sizeof(buffer));
-  printf("   Duration: %s\n", buffer);
-  printf("Sample Rate: %d SPS\n", start_header->sample_rate);
-  printf("       Size: %.1f MB\n", end_header->address * 512.0 / 1e6);
-
-  indent("             ", (char *) start_header->comment, buffer, sizeof(buffer));
-  printf("    Comment: %s\n", buffer);
+  kum_6d6_show_info(stdout, start_header, end_header);
 
   return 0;
 }

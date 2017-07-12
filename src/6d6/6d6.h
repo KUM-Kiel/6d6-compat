@@ -58,3 +58,7 @@ typedef int (*kum_6d6_data_callback)(kum_6d6_file *file, uint64_t start, uint64_
 /* Process a file. Calls the supplied callbacks.
  * Returns -1 on error or if processing was stopped. */
 extern int kum_6d6_file_process(kum_6d6_file *file, kum_6d6_timestamp_callback timestamp_callback, kum_6d6_data_callback data_callback);
+
+/* Print info about a 6D6 file toe the given stream.
+ * Returns -1 on error. */
+extern int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end_header);

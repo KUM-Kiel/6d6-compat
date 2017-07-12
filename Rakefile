@@ -9,26 +9,30 @@ else
   host = "linux-i386"
 end
 
+C.library 'tai', [
+  'tai.c',
+]
+
 C.library '6d6', [
   '6d6.c',
-  'find_timestamp.c'
+  'find_timestamp.c',
 ]
 
 C.library 's2x', [
   's2x.c',
-  's2x_channel.c'
+  's2x_channel.c',
 ]
 
 C.library 'blockreader', [
-  'blockreader.c'
+  'blockreader.c',
 ]
 
 C.library 'options', [
-  'options.c'
+  'options.c',
 ]
 
 C.library 'utime', [
-  'utime.c'
+  'utime.c',
 ]
 
 C.library 'bcd', [
@@ -37,21 +41,23 @@ C.library 'bcd', [
   'bcd_parse.c',
   'bcd_valid.c',
   'bcd_weekday.c',
-  'bcd_format.c'
+  'bcd_format.c',
 ]
 
 C.library 'samplerate', [
   'samplerate.c',
   'src_linear.c',
   'src_sinc.c',
-  'src_zoh.c'
+  'src_zoh.c',
 ]
 
 C.program '6d6copy', [
   '6d6copy.c',
   'lib6d6.a',
   'liboptions.a',
-  '-lm'
+  'libbcd.a',
+  'libtai.a',
+  '-lm',
 ]
 
 C.program '6d6read', [
@@ -59,8 +65,9 @@ C.program '6d6read', [
   'lib6d6.a',
   'libs2x.a',
   'libbcd.a',
+  'libtai.a',
   'liboptions.a',
-  '-lm'
+  '-lm',
 ]
 
 C.program '6d6info', [
@@ -68,7 +75,8 @@ C.program '6d6info', [
   'lib6d6.a',
   'liboptions.a',
   'libbcd.a',
-  '-lm'
+  'libtai.a',
+  '-lm',
 ]
 
 C.program '6d6mseed', [
@@ -76,17 +84,19 @@ C.program '6d6mseed', [
   'lib6d6.a',
   'liboptions.a',
   'libbcd.a',
-  '-lm'
+  'libtai.a',
+  '-lm',
 ]
 
 C.program 's2xshift', [
   's2xshift.c',
   'libs2x.a',
-  '-lm'
+  '-lm',
 ]
 
 C.program 'tai', [
   'tai.c',
+  'libtai.a',
 ]
 
 desc "Install everything."
