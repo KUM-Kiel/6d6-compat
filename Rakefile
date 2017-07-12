@@ -99,6 +99,11 @@ C.program 'tai', [
   'libtai.a',
 ]
 
+C.program 'mseed-check', [
+  'mseed-check.c',
+  'libtai.a',
+]
+
 desc "Install everything."
 task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed'] do
   system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
