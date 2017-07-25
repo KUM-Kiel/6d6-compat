@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Better information display.
+- Displayed information is now consistent for `6d6mseed` and `6d6info`.
 
 ## [1.2.4] - 2017-07-10
 ### Added
