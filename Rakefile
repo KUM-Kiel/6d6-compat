@@ -124,7 +124,7 @@ task :package => [
   archive = "6d6-compat-#{date}-#{version}-#{host}"
   system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
   system "rm -rf '#{archive}'"
-    system "mkdir '#{archive}'"
+  system "mkdir '#{archive}'"
   system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/Makefile package/README LICENCE '#{archive}'"
   system "tar czf '#{archive}.tar.gz' '#{archive}'"
 end
