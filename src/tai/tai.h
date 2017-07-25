@@ -213,20 +213,28 @@ Date tai_date(Time t, int *yday, int *wday)
 Time tai_now(void)
 {
   Time t;
+#ifndef __APPLE__
+  // clock_gettime was added in macOS 10.12.
+  // So if we use it we will be incompatible with all previous versions.
 #ifdef CLOCK_REALTIME
   struct timespec tv;
+#if 0
+  // CLOCK_TAI is on most systems just the same as CLOCK_REALTIME.
+  // So it is better for now to correct CLOCK_REALTIME instead of getting a
+  // false CLOCK_TAI value.
 #ifdef CLOCK_TAI
   if (clock_gettime(CLOCK_TAI, &tv) == 0) {
     t = (int64_t) (tv.tv_sec - 946684800) * 1000000 + tv.tv_nsec / 1000;
-    // TODO: CLOCK_TAI is probably lying.
     return t;
   }
+#endif
 #endif
   if (clock_gettime(CLOCK_REALTIME, &tv) == 0) {
     t = (int64_t) (tv.tv_sec - 946684800) * 1000000 + tv.tv_nsec / 1000;
     t = tai__leapsec_add(t, 0);
     return t;
   }
+#endif
 #endif
   struct timeval tp;
   if (gettimeofday(&tp, 0) == 0) {
