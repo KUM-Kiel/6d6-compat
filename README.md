@@ -32,6 +32,41 @@ $ cd 6d6-compat
 $ rake
 $ rake install
 ```
+## Finding the device path of a StiK or SD card
+
+Several commands need the device path of a StiK or SD card.
+A device path normally looks like `/dev/sdb1`.
+
+### Linux
+
+On newer Linux distributions the following command can be tried:
+
+```text
+$ sudo dmesg -w
+```
+
+If that does not work one can try
+
+```text
+$ sudo tail -f /var/log/syslog
+```
+
+Now the StiK or SD card can be plugged in.
+Once it is detected by the computer, a message with the device path should appear in the terminal.
+The device path normally looks like `/dev/sdb1` but it could also be like `/dev/mmcblk0p1`.
+
+The message log can now be stopped with `Ctrl`+`C`.
+
+### macOS
+
+On macOS the device path looks like `/dev/disk2`.
+
+The device path can be found by opening the `Disk Utility.app` (search for “Disk Utility” in Spotlight).
+Now select the proper device in the list on the left.
+The device name will now be displayed on the bottom right.
+If the device name is `disk2`, the device path will be `/dev/disk2`.
+
+![Disk Utility](disk-utility.png)
 
 ## Licence
 
