@@ -115,6 +115,19 @@ static Time bcd_time(const uint8_t *bcd)
   return tai_time(date);
 }
 
+static int alphanum(const char *s)
+{
+  while (*s) {
+    if ((*s < '0' || *s > '9') &&
+        (*s < 'A' || *s > 'Z') &&
+        (*s < 'a' || *s > 'z')) {
+      return 0;
+    }
+    ++s;
+  }
+  return 1;
+}
+
 int main(int argc, char **argv)
 {
   kum_6d6_header h_start, h_end;
@@ -207,8 +220,8 @@ int main(int argc, char **argv)
   /* Drop root privileges if we had any. */
   (void) setuid(getuid());
 
-  if (!station || strlen(station) <= 0 || strlen(station) > 5) {
-    fprintf(stderr, "Please specify a station code of 1 to 5 characters with --station=code.\n");
+  if (!station || strlen(station) <= 0 || strlen(station) > 5 || !alphanum(station)) {
+    fprintf(stderr, "Please specify a station code of 1 to 5 alphanumeric characters with --station=code.\n");
     return 1;
   }
 
