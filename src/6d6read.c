@@ -16,9 +16,9 @@
 static const char *program = "6d6read";
 static void help(const char *arg)
 {
-  fprintf(stderr, "Version %s (%s)\n",
+  fprintf(stdout, "Version %s (%s)\n",
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [-q|--no-progress] < in.6d6 > out.s2x\n"
     "\n"
     "The program '6d6read' is used to convert raw data from the 6D6 datalogger\n"

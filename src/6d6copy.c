@@ -11,9 +11,9 @@
 const char *program = "6d6copy";
 static void help(const char *arg)
 {
-  fprintf(stderr, "Version %s (%s)\n",
+  fprintf(stdout, "Version %s (%s)\n",
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [-q|--no-progress] /dev/sdX1 out.6d6\n"
     "\n"
     "The program '6d6copy' makes a perfect copy of a StiK or 6D6 SD card\n"
