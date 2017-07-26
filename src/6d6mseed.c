@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <stdarg.h>
 #include "6d6.h"
 #include "bcd.h"
 #include "number.h"
@@ -19,18 +20,32 @@
 #define WMSEED_IMPLEMENTATION
 #include "wmseed.h"
 
+static FILE *_logfile = 0;
+static void log_entry(FILE *f, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  if (_logfile) {
+    vfprintf(_logfile, format, args);
+    fflush(_logfile);
+  }
+  vfprintf(f, format, args);
+  fflush(f);
+  va_end(args);
+}
+
 static void fatal(const char *s)
 {
-  fprintf(stderr, "%s\n", s);
+  log_entry(stderr, "%s\n", s);
   exit(1);
 }
 
 static const char *program = "6d6mseed";
 static void help(const char *arg)
 {
-  fprintf(stderr, "Version %s (%s)\n",
+  fprintf(stdout, "Version %s (%s)\n",
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [options] input.6d6\n"
     "\n"
     "The program '6d6mseed' is used to convert raw data from the 6D6 datalogger\n"
@@ -74,6 +89,12 @@ static void help(const char *arg)
     "\n"
     "  Cut the data in files of SECONDS. The default value is 86400, i.e. one day.\n"
     "\n"
+    "--logfile=FILE\n"
+    "\n"
+    "  Create a logfile at FILE.\n"
+    "  The logfile contains all important information regarding recording data\n"
+    "  and created files. It also lists errors which occured during processing.\n"
+    "\n"
     "Examples\n"
     "--------\n"
     "\n"
@@ -96,7 +117,7 @@ static void help(const char *arg)
 static void read_block(uint8_t *block, FILE *f)
 {
   if (fread(block, 512, 1, f) != 1) {
-    fprintf(stderr, "I/O error\n");
+    log_entry(stderr, "I/O error\n");
     exit(1);
   }
 }
@@ -150,22 +171,10 @@ int main(int argc, char **argv)
   char *station = 0, *location = "", *network = "";
   char *template = 0;
   char *cut_string = 0;
+  char *logfile = 0;
   int cut = 86400;
 
   int progress = 1;
-
-  /* Check the leapsecond information. */
-  if (tai_leapsecs_need_update(tai_now())) {
-    fprintf(stderr,
-      "\n"
-      "############################################################\n"
-      "#                     !!! WARNING !!!                      #\n"
-      "#         The leapsecond information is outdated.          #\n"
-      "#         Please download the newest release here:         #\n"
-      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
-      "############################################################\n"
-      "\n");
-  }
 
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
@@ -176,7 +185,8 @@ int main(int argc, char **argv)
     PARAMETER(0, "location", location),
     PARAMETER(0, "network", network),
     PARAMETER(0, "output", template),
-    PARAMETER('c', "cut", cut_string)
+    PARAMETER('c', "cut", cut_string),
+    PARAMETER('l', "logfile", logfile)
   ));
 
   if (cut_string) {
@@ -220,25 +230,46 @@ int main(int argc, char **argv)
   /* Drop root privileges if we had any. */
   (void) setuid(getuid());
 
+  /* Create the logfile. */
+  if (logfile) {
+    _logfile = fopen(logfile, "wb");
+    if (!_logfile) {
+      fprintf(stderr, "Could not open logfile: %s.\n", strerror(errno));
+    }
+  }
+
+  /* Check the leapsecond information. */
+  if (tai_leapsecs_need_update(tai_now())) {
+    log_entry(stderr,
+      "\n"
+      "############################################################\n"
+      "#                     !!! WARNING !!!                      #\n"
+      "#         The leapsecond information is outdated.          #\n"
+      "#         Please download the newest release here:         #\n"
+      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
+      "############################################################\n"
+      "\n");
+  }
+
   if (!station || strlen(station) <= 0 || strlen(station) > 5 || !alphanum(station)) {
     fprintf(stderr, "Please specify a station code of 1 to 5 alphanumeric characters with --station=code.\n");
     return 1;
   }
 
-  fprintf(stderr, "Processing '%s'.\n", filename);
-  fprintf(stderr, "============================================================\n");
+  log_entry(stderr, "Processing '%s'.\n", filename);
+  log_entry(stderr, "============================================================\n");
 
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
-      fprintf(stderr, "Malformed 6D6 start header!\n");
+      log_entry(stderr, "Malformed 6D6 start header!\n");
       exit(1);
     }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
-    fprintf(stderr, "Malformed 6D6 end header!\n");
+    log_entry(stderr, "Malformed 6D6 end header!\n");
     exit(1);
   }
 
@@ -258,15 +289,19 @@ int main(int argc, char **argv)
   assert(0 <= n_channels && n_channels <= KUM_6D6_MAX_CHANNEL_COUNT);
   for (c = 0; c < n_channels; ++c) {
     channels[c] = wmseed_new(
+      _logfile,
       template,
       station, location, (const char *) h_start.channel_names[c], network,
       h_start.sample_rate,
       cut);
   }
 
+  if (_logfile) {
+    kum_6d6_show_info(_logfile, &h_start, &h_end);
+  }
   kum_6d6_show_info(stderr, &h_start, &h_end);
 
-  fprintf(stderr, "============================================================\n");
+  log_entry(stderr, "============================================================\n");
 
   i = 2;
   /* Skip to start of data.
@@ -339,7 +374,7 @@ done:
     wmseed_destroy(channels[c]);
   }
   if (progress) {
-    fprintf(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
+    log_entry(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
     fflush(stderr);
   }
 
