@@ -47,6 +47,20 @@ int main(int argc, char **argv)
   kum_6d6_header start_header[1], end_header[1];
   int e;
 
+  int outdated = tai_leapsecs_need_update(tai_now());
+
+  if (outdated) {
+    fprintf(stderr,
+      "\n"
+      "############################################################\n"
+      "#                     !!! WARNING !!!                      #\n"
+      "#         The leapsecond information is outdated.          #\n"
+      "#         Please download the newest release here:         #\n"
+      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
+      "############################################################\n"
+      "\n");
+  }
+
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
     FLAG_CALLBACK('h', "help", help)

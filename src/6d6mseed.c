@@ -174,7 +174,21 @@ int main(int argc, char **argv)
   char *logfile = 0;
   int cut = 86400;
 
+  int outdated = tai_leapsecs_need_update(tai_now());
+
   int progress = 1;
+
+  if (outdated) {
+    fprintf(stderr,
+      "\n"
+      "############################################################\n"
+      "#                     !!! WARNING !!!                      #\n"
+      "#         The leapsecond information is outdated.          #\n"
+      "#         Please download the newest release here:         #\n"
+      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
+      "############################################################\n"
+      "\n");
+  }
 
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
@@ -239,8 +253,8 @@ int main(int argc, char **argv)
   }
 
   /* Check the leapsecond information. */
-  if (tai_leapsecs_need_update(tai_now())) {
-    log_entry(stderr,
+  if (outdated && _logfile) {
+    fprintf(_logfile,
       "\n"
       "############################################################\n"
       "#                     !!! WARNING !!!                      #\n"
