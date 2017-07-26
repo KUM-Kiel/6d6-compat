@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.2.6] - 2017-07-26
 ### Added
 - Added a `--logfile` option to `6d6mseed`. The logfile contains information about events during processing.
 
