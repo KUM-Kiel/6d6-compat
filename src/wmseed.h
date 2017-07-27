@@ -65,7 +65,7 @@ static void *wmseed__allocate(WMSeed *w, void *x, size_t size)
   if (size) {
     t = realloc(x, size);
     if (!t) {
-      wmseed__log(w, stderr, i18n->out_of_memory);
+      wmseed__log(w, stderr, "%s", i18n->out_of_memory);
       exit(1);
     }
     return t;
@@ -272,7 +272,7 @@ static void wmseed__flush(WMSeed *w)
 {
   if (w->data_pending) {
     if (fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
-      wmseed__log(w, stderr, i18n->io_error);
+      wmseed__log(w, stderr, "%s", i18n->io_error);
       exit(1);
     }
     w->data_pending = 0;

@@ -27,7 +27,7 @@ static void help(const char *arg)
 static void read_block(uint8_t *block, FILE *f)
 {
   if (fread(block, 512, 1, f) != 1) {
-    fprintf(stderr, i18n->io_error);
+    fprintf(stderr, "%s", i18n->io_error);
     exit(1);
   }
 }
@@ -132,13 +132,13 @@ int main(int argc, char **argv)
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
-      fprintf(stderr, i18n->malformed_6d6_header);
+      fprintf(stderr, "%s", i18n->malformed_6d6_header);
       exit(1);
     }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
-    fprintf(stderr, i18n->malformed_6d6_header);
+    fprintf(stderr, "%s", i18n->malformed_6d6_header);
     exit(1);
   }
 
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
               st_i32_le(x + 8, -1);
               st_i32_le(x + 12, start_time + frame[1]);
               if (fwrite(x, 16, 1, output) != 1) {
-                fprintf(stderr, i18n->io_error);
+                fprintf(stderr, "%s", i18n->io_error);
                 return 1;
               }
             }
@@ -236,7 +236,7 @@ int main(int argc, char **argv)
             st_i32_le(x + 4, 0);
             st_i32_le(x + 8, -1);
             if (fwrite(x, 12, 1, output) != 1) {
-              fprintf(stderr, i18n->io_error);
+              fprintf(stderr, "%s", i18n->io_error);
               return 1;
             }
             goto done;

@@ -66,7 +66,7 @@ int main(int argc, char **argv)
       offset = 512;
       l -= 512;
     } else {
-      fprintf(stderr, i18n->malformed_6d6_header);
+      fprintf(stderr, "%s", i18n->malformed_6d6_header);
       exit(1);
     }
   }

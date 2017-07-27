@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 
   int outdated = tai_leapsecs_need_update(tai_now());
   if (outdated) {
-    fprintf(stderr, i18n->leapsec_outdated);
+    fprintf(stderr, "%s", i18n->leapsec_outdated);
   }
 
   program = argv[0];
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 
   /* Check the leapsecond information. */
   if (outdated && _logfile) {
-    fprintf(_logfile, i18n->leapsec_outdated);
+    fprintf(_logfile, "%s", i18n->leapsec_outdated);
   }
 
   if (!station || strlen(station) <= 0 || strlen(station) > 5 || !alphanum(station)) {
@@ -198,13 +198,13 @@ int main(int argc, char **argv)
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
-      log_entry(stderr, i18n->malformed_6d6_header);
+      log_entry(stderr, "%s", i18n->malformed_6d6_header);
       exit(1);
     }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
-    log_entry(stderr, i18n->malformed_6d6_header);
+    log_entry(stderr, "%s", i18n->malformed_6d6_header);
     exit(1);
   }
 

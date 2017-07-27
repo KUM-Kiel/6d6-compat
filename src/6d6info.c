@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
   int outdated = tai_leapsecs_need_update(tai_now());
   if (outdated) {
-    fprintf(stderr, i18n->leapsec_outdated);
+    fprintf(stderr, "%s", i18n->leapsec_outdated);
   }
 
   program = argv[0];
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
       kum_6d6_header_read(start_header, buffer + 512) == 0 &&
       kum_6d6_header_read(end_header, buffer + 1024) == 0) {
     } else {
-      fprintf(stderr, i18n->malformed_6d6_header);
+      fprintf(stderr, "%s", i18n->malformed_6d6_header);
       exit(1);
     }
   }
