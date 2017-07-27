@@ -13,6 +13,10 @@ C.library 'tai', [
   'tai.c',
 ]
 
+C.library 'i18n', [
+  'i18n.c',
+]
+
 C.library '6d6', [
   '6d6.c',
   'find_timestamp.c',
@@ -57,6 +61,7 @@ C.program '6d6copy', [
   'liboptions.a',
   'libbcd.a',
   'libtai.a',
+  'libi18n.a',
   '-lm',
 ]
 
@@ -67,6 +72,7 @@ C.program '6d6read', [
   'libbcd.a',
   'libtai.a',
   'liboptions.a',
+  'libi18n.a',
   '-lm',
 ]
 
@@ -76,6 +82,7 @@ C.program '6d6info', [
   'liboptions.a',
   'libbcd.a',
   'libtai.a',
+  'libi18n.a',
   '-lm',
 ]
 
@@ -85,6 +92,7 @@ C.program '6d6mseed', [
   'liboptions.a',
   'libbcd.a',
   'libtai.a',
+  'libi18n.a',
   '-lm',
 ]
 
@@ -103,6 +111,15 @@ C.program 'mseed-check', [
   'mseed-check.c',
   'libtai.a',
 ]
+
+require './i18n'
+file 'src/i18n/i18n.h' => ['i18n/en_GB.txt', 'i18n/de_DE.txt', 'i18n.rb'] do
+  i18n = I18n.new
+  i18n.add_lang 'en_GB', 'i18n/en_GB.txt'
+  i18n.add_lang 'de_DE', 'i18n/de_DE.txt'
+  system 'mkdir -p src/i18n/'
+  i18n.write_h 'src/i18n/i18n.h'
+end
 
 desc "Install everything."
 task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed'] do

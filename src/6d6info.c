@@ -10,31 +10,15 @@
 #include "bcd.h"
 #include "options.h"
 #include "version.h"
+#include "tai.h"
+#include "i18n.h"
 
 const char *program = "6d6info";
 static void help(const char *arg)
 {
-  fprintf(stdout, "Version %s (%s)\n",
+  fprintf(stdout, i18n->version_ss,
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stdout,
-    "Usage: %s /dev/sdX1\n"
-    "\n"
-    "The program '6d6info' shows some information about a 6D6 recording.\n"
-    "You can either use it on a StiK or SD card or to get some information\n"
-    "about a .6d6 file on your hard drive.\n"
-    "\n"
-    "The parameter is the file or device you want to inspect.\n"
-    "\n"
-    "Examples\n"
-    "--------\n"
-    "\n"
-    "Inspect the StiK in '/dev/sdb1':\n"
-    "\n"
-    "  $ 6d6info /dev/sdb1\n"
-    "\n"
-    "Inspect the file 'station-007.6d6' in the directory 'line-001':\n"
-    "\n"
-    "  $ 6d6info line-001/station-007.6d6\n",
+  fprintf(stdout, i18n->usage_6d6info_s,
     program);
   exit(1);
 }
@@ -47,18 +31,11 @@ int main(int argc, char **argv)
   kum_6d6_header start_header[1], end_header[1];
   int e;
 
-  int outdated = tai_leapsecs_need_update(tai_now());
+  i18n_set_lang(getenv("LANG"));
 
+  int outdated = tai_leapsecs_need_update(tai_now());
   if (outdated) {
-    fprintf(stderr,
-      "\n"
-      "############################################################\n"
-      "#                     !!! WARNING !!!                      #\n"
-      "#         The leapsecond information is outdated.          #\n"
-      "#         Please download the newest release here:         #\n"
-      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
-      "############################################################\n"
-      "\n");
+    fprintf(stderr, i18n->leapsec_outdated);
   }
 
   program = argv[0];
@@ -74,7 +51,7 @@ int main(int argc, char **argv)
     snprintf(buffer, sizeof(buffer), "/dev/%s", argv[1]);
     infile = fopen(buffer, "rb");
     if (!infile) {
-      fprintf(stderr, "Could not open '%s': %s.\n", argv[1], strerror(e));
+      fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
       exit(1);
     }
   }
@@ -88,7 +65,7 @@ int main(int argc, char **argv)
       kum_6d6_header_read(start_header, buffer + 512) == 0 &&
       kum_6d6_header_read(end_header, buffer + 1024) == 0) {
     } else {
-      fprintf(stderr, "Invalid file '%s'.\n", argv[1]);
+      fprintf(stderr, i18n->malformed_6d6_header);
       exit(1);
     }
   }

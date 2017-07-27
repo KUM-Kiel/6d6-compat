@@ -41,6 +41,7 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number);
 #include <sys/stat.h>
 #include <unistd.h>
 #include <math.h>
+#include "i18n.h"
 
 #if __GNUC__ || __clang__
 __attribute__((format(printf, 3, 4)))
@@ -64,7 +65,7 @@ static void *wmseed__allocate(WMSeed *w, void *x, size_t size)
   if (size) {
     t = realloc(x, size);
     if (!t) {
-      wmseed__log(w, stderr, "Out of memory!\n");
+      wmseed__log(w, stderr, i18n->out_of_memory);
       exit(1);
     }
     return t;
@@ -271,7 +272,7 @@ static void wmseed__flush(WMSeed *w)
 {
   if (w->data_pending) {
     if (fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
-      wmseed__log(w, stderr, "I/O error!\n");
+      wmseed__log(w, stderr, i18n->io_error);
       exit(1);
     }
     w->data_pending = 0;
@@ -311,10 +312,10 @@ static void wmseed__create_file(WMSeed *w, Time t)
   free(dirname);
   w->output = fopen(filename, "wb");
   if (!w->output) {
-    wmseed__log(w, stderr, "Could not create file '%s': %s.\n", filename, strerror(errno));
+    wmseed__log(w, stderr, i18n->could_not_create_file_ss, filename, strerror(errno));
     exit(1);
   } else {
-    wmseed__log(w, stderr, "Created file '%s'.\n", filename);
+    wmseed__log(w, stderr, i18n->created_file_s, filename);
   }
   free(filename);
 }

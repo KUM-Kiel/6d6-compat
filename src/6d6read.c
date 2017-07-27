@@ -12,39 +12,14 @@
 #include "s2x.h"
 #include "s2x_channel.h"
 #include "version.h"
+#include "i18n.h"
 
 static const char *program = "6d6read";
 static void help(const char *arg)
 {
-  fprintf(stdout, "Version %s (%s)\n",
+  fprintf(stdout, i18n->version_ss,
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stdout,
-    "Usage: %s [-q|--no-progress] < in.6d6 > out.s2x\n"
-    "\n"
-    "The program '6d6read' is used to convert raw data from the 6D6 datalogger\n"
-    "into the Send2X format.\n"
-    "This is useful if you still have a lot of old dataloggers and want to use\n"
-    "a uniform method of data analysis.\n"
-    "\n"
-    "The input file is a .6d6 file and is written with an opening angle bracket '<'.\n"
-    "The output file will be a .s2x file and is preceded by a closing angle\n"
-    "bracket '>'.\n"
-    "\n"
-    "If the input file is a valid .6d6 file, the conversion process will begin and\n"
-    "the progress will be reported to the terminal. If you want to suppress the\n"
-    "progress display, you can use the flag '-q' or '--no-progress'. This might be\n"
-    "useful in automated scripts.\n"
-    "\n"
-    "Examples\n"
-    "--------\n"
-    "\n"
-    "Convert the file 'station-007.6d6' to Send2X format:\n"
-    "\n"
-    "  $ 6d6read < station-007.6d6 > station-007.s2x\n"
-    "\n"
-    "Convert the file 'x.6d6' to 'y.s2x' and suppress the progress display:\n"
-    "\n"
-    "  $ 6d6read --no-progress < x.6d6 > y.s2x\n",
+  fprintf(stdout, i18n->usage_6d6read_s,
     program);
   exit(1);
 }
@@ -52,7 +27,7 @@ static void help(const char *arg)
 static void read_block(uint8_t *block, FILE *f)
 {
   if (fread(block, 512, 1, f) != 1) {
-    fprintf(stderr, "I/O error\n");
+    fprintf(stderr, i18n->io_error);
     exit(1);
   }
 }
@@ -118,6 +93,8 @@ int main(int argc, char **argv)
   int pos, remaining = 0, have_time = 0;
   int32_t frame[KUM_6D6_MAX_CHANNEL_COUNT];
 
+  i18n_set_lang(getenv("LANG"));
+
   int progress = 1;
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
@@ -135,7 +112,7 @@ int main(int argc, char **argv)
         snprintf(str, sizeof(str), "/dev/%s", argv[1]);
         input = fopen(str, "rb");
         if (!input) {
-          fprintf(stderr, "Could not open '%s': %s.\n", argv[1], strerror(e));
+          fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
           exit(1);
         }
       }
@@ -155,13 +132,13 @@ int main(int argc, char **argv)
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
-      fprintf(stderr, "Malformed 6D6 start header\n");
+      fprintf(stderr, i18n->malformed_6d6_header);
       exit(1);
     }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
-    fprintf(stderr, "Malformed 6D6 end header\n");
+    fprintf(stderr, i18n->malformed_6d6_header);
     exit(1);
   }
 
@@ -236,7 +213,7 @@ int main(int argc, char **argv)
               st_i32_le(x + 8, -1);
               st_i32_le(x + 12, start_time + frame[1]);
               if (fwrite(x, 16, 1, output) != 1) {
-                fprintf(stderr, "I/O error\n");
+                fprintf(stderr, i18n->io_error);
                 return 1;
               }
             }
@@ -259,7 +236,7 @@ int main(int argc, char **argv)
             st_i32_le(x + 4, 0);
             st_i32_le(x + 8, -1);
             if (fwrite(x, 12, 1, output) != 1) {
-              fprintf(stderr, "I/O error\n");
+              fprintf(stderr, i18n->io_error);
               return 1;
             }
             goto done;

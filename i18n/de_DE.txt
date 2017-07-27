@@ -1,0 +1,191 @@
+###version_ss
+Version %s (%s)
+###invalid_cut
+Ungültiger Wert für '--cut'.
+###could_not_open_ss
+Konnte Datei '%s' nicht öffnen: %s.
+###could_not_open_logfile_s
+Konnte Logdatei nicht öffnen: %s.
+###invalid_station_code
+Bitte geben Sie einen Stationscode von 1 bis 5 alphanumerischen Zeichen mit
+--station=CODE an.
+###processing_s
+Verarbeite '%s'.
+###out_of_memory
+Arbeitsspeicher ist voll!
+###io_error
+I/O-Fehler!
+###io_error_d
+I/O-Fehler (%d)!
+###created_file_s
+Datei '%s' erstellt.
+###could_not_create_file_ss
+Konnte Datei '%s' nicht erstellen: %s.
+###malformed_6d6_header
+Beschädigter 6D6-Header!
+###leapsec_outdated
+
+############################################################
+#                     !!! WARNUNG !!!                      #
+#  Die Schaltsekundeninformation ist nicht mehr aktuell.   #
+#    Bitte laden Sie die neuste Version hier herunter:     #
+#     https://github.com/KUM-Kiel/6d6-compat/releases      #
+############################################################
+
+###usage_6d6mseed_s
+Verwendung: %s [Optionen] input.6d6
+
+Das Programm '6d6mseed' konvertiert Rohdaten des 6D6-Datenloggers in das
+MiniSEED-Format.
+
+Optionen
+--------
+
+--station=CODE
+
+  Setzt den MiniSEED-Stationscode auf CODE. Der Stationscode ist für die
+  MiniSEED-Erzeugung zwingend erforderlich. Er besteht aus 1 bis 5 alpha-
+  numerischen ASCII-Zeichen.
+
+--location=CODE
+
+  Setzt den Location-Code auf CODE. Der Location-Code besteht aus zwei Zeichen
+  und kann benutzt werden um mehrere Sensoren an einer Station zu unterscheiden.
+
+--network=CODE
+
+  Setzt den Network-Code auf CODE. Dies ist ein zweistelliger Code, der vom
+  IRIS vergeben wird.
+
+--output=FILENAME_TEMPLATE
+
+  Setzt ein Muster für Dateinamen. Im Muster können die folgenden Platzhalter
+  verwendet werden:
+
+    %%y - Jahr
+    %%m - Monat
+    %%d - Tag
+    %%h - Stunde
+    %%i - Minute
+    %%s - Sekunde
+    %%S - Stations-Code
+    %%L - Location-Code
+    %%C - Kanal
+    %%N - Network-Code
+
+  Der Standardwert ist 'out/%%S/%%y-%%m-%%d-%%C.mseed'.
+
+--cut=SECONDS
+
+  Schneidet die Daten in Stücke von SECONDS Sekunden. Der Standardwert ist
+  86400, also ein Tag.
+
+--logfile=FILE
+
+  Erstellt eine Logdatei unter FILE.
+  Die Logdatei enthält alle wichtigen Ereignisse, die während des Konvertierens
+  auftreten. Das sind hauptsächlich allgemeine Informationen über die Daten,
+  Namen von erstellten Dateien und eventuelle Fehler.
+
+Beispiele
+---------
+
+Konvertiert die Datei 'ST007.6d6' mit den Standardeinstellungen nach MiniSEED.
+Die Option '--station' wird immer benötigt!
+
+  $ 6d6mseed --station=ST007 ST007.6d6
+
+Konvertiert die Datei 'ST007.6d6' mit einem Network-Code und benutzerdefinierten
+MiniSEED-Dateinamen.
+
+  $ 6d6mseed ST007.6d6 \
+      --station=ST007 \
+      --network=XX \
+      --output=%%N/%%S/%%y-%%m-%%d-%%C.mseed
+
+###usage_6d6info_s
+Verwendung: %s /dev/sdX1
+
+Das Programm '6d6info' zeigt Informationen zu einer 6D6-Aufnahme an.
+Es kann entweder direkt mit einem StiK oder einer SD-Karte verwendet werden oder
+Informationen über eine .6d6-Datei auf der Festplatte anzeigen.
+
+Der Parameter ist die Datei oder das Gerät, das untersucht werden soll.
+
+Beispiele
+---------
+
+Zeigt Informationen zum StiK in '/dev/sdb1':
+
+  $ 6d6info /dev/sdb1
+
+Zeigt Informationen zur Datei 'station-007.6d6' im Ordner 'line-001':
+
+  $ 6d6info line-001/station-007.6d6
+
+###usage_6d6copy_s
+Verwendung: %s [-q|--no-progress] /dev/sdX1 out.6d6
+
+Das Programm '6d6copy' erstellt eine 1:1-Kopie eines StiKs oder einer SD-Karte
+in eine .6d6-Datei.
+Eine .6d6-Datei ist besonders für Backups geeignet, da sie alle Rohdaten in
+unveränderter Form enthält. Sie ist somit auch prädestinierter Startpunkt für
+beliebige Datenanalysen und Konvertierungen.
+
+Der erste Parameter ist die Quelldatei. Dies ist normalerweise der Gerätepfad
+des StiKs oder der SD-Karte und sieht ähnlich aus wie '/dev/sdb1' oder
+'/dev/mmcblk0p1'.
+Der zweite Parameter ist der Dateiname, unter dem die Kopie gespeichert werden
+soll. Diese Datei sollte am besten die Endung '.6d6' haben, um sie als
+6D6-Rohdaten-Datei zu identifizieren.
+
+Wenn Eingabe- und Ausgabedatei gültig sind, beginnt der Kopiervorgang und der
+Fortschritt wird im Terminal angezeigt. Um die Ausgabe z.B. für automatisierte
+Scripts zu unterdrücken, kann die Option '-q' bzw. '--no-progress' verwendet
+werden.
+
+Beispiele
+---------
+
+Archiviert den StiK in '/dev/sdb1' auf eine Backup-Festplatte.
+
+  $ 6d6copy /dev/sdb1 /media/Backup/Experiment-003/Station-007.6d6
+
+Kopiert die SD-Karte in '/dev/mmcblk0p1' ins aktuelle Verzeichnis.
+
+  $ 6d6copy /dev/mmcblk0p1 Station-013.6d6
+
+###usage_6d6read_s
+Verwendung: %s [-q|--no-progress] < in.6d6 > out.s2x
+
+Das Programm '6d6read' konvertiert Rohdaten vom 6D6-Datenlogger in das
+Send2X-Format.
+Dies kann nützlich sein, wenn noch eine große Anzahl von alten Datenloggern
+vorhanden ist und eine einheitliche Datenverarbeitung gewünscht ist.
+
+Die Eingabedatei ist eine .6d6-Datei und wird mit einer öffnenden spitzen
+Klammer angegeben '<'.
+Die Ausgabedatei ist eine .s2x-Datei und wird mit einer schließenden spitzen
+Klammer angegeben '>'.
+
+If the input file is a valid .6d6 file, the conversion process will begin and
+the progress will be reported to the terminal. If you want to suppress the
+progress display, you can use the flag '-q' or '--no-progress'. This might be
+useful in automated scripts.
+
+Wenn Eingabedatei eine gültige .6d6-Datei ist, beginnt der Konvertierungs-
+vorgang und der Fortschritt wird im Terminal angezeigt. Um die Ausgabe z.B. für
+automatisierte Scripts zu unterdrücken, kann die Option '-q' bzw.
+'--no-progress' verwendet werden.
+
+Beispiele
+---------
+
+Konvertiert die Datei 'station-007.6d6' ins Send2X-Format:
+
+  $ 6d6read < station-007.6d6 > station-007.s2x
+
+Konvertiert die Datei 'x.6d6' nach 'y.s2x' ohne Fortschrittsanzeige:
+
+  $ 6d6read --no-progress < x.6d6 > y.s2x
+

@@ -7,47 +7,21 @@
 #include "6d6.h"
 #include "options.h"
 #include "version.h"
+#include "i18n.h"
 
 const char *program = "6d6copy";
 static void help(const char *arg)
 {
-  fprintf(stdout, "Version %s (%s)\n",
+  fprintf(stdout, i18n->version_ss,
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stdout,
-    "Usage: %s [-q|--no-progress] /dev/sdX1 out.6d6\n"
-    "\n"
-    "The program '6d6copy' makes a perfect copy of a StiK or 6D6 SD card\n"
-    "to a file.\n"
-    "This is a great backup mechanism and you can use the .6d6 files as a\n"
-    "starting point for arbitrary data analysis methods.\n"
-    "\n"
-    "The first argument is the source of the data. This is normally your\n"
-    "StiK or SD card device like '/dev/sdb1' or '/dev/mmcblk0p1'.\n"
-    "The second argument is the file to which the copy will be made.\n"
-    "This file should have a .6d6 ending to identify it as 6D6 raw data.\n"
-    "\n"
-    "When you start the program and the input and output files are valid,\n"
-    "the copy operation begins and the progress is shown on the terminal.\n"
-    "To suppress that progress display you can use the flags '-q' or\n"
-    "'--no-progress'. This might be useful in automated scripts.\n"
-    "\n"
-    "Examples\n"
-    "--------\n"
-    "\n"
-    "Archive the StiK in '/dev/sdb1' to a backup hard drive.\n"
-    "\n"
-    "  $ 6d6copy /dev/sdb1 /media/Backup/Experiment-003/Station-007.6d6\n"
-    "\n"
-    "Copy the SD card in '/dev/mmcblk0p1' to the current directory.\n"
-    "\n"
-    "  $ 6d6copy /dev/mmcblk0p1 Station-013.6d6\n",
+  fprintf(stdout, i18n->usage_6d6copy_s,
     program);
   exit(1);
 }
 
 static void io_error(int x)
 {
-  fprintf(stderr, "IO error. (%d)\n", x);
+  fprintf(stderr, i18n->io_error_d, x);
   exit(1);
 }
 
@@ -58,6 +32,8 @@ int main(int argc, char **argv)
   char buffer[1024*128];
   kum_6d6_header start_header[1], end_header[1];
   int offset = 0, e, progress = 1;
+
+  i18n_set_lang(getenv("LANG"));
 
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
@@ -74,7 +50,7 @@ int main(int argc, char **argv)
     snprintf(buffer, sizeof(buffer), "/dev/%s", argv[1]);
     infile = fopen(buffer, "rb");
     if (!infile) {
-      fprintf(stderr, "Could not open '%s': %s.\n", argv[1], strerror(e));
+      fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
       exit(1);
     }
   }
@@ -90,14 +66,14 @@ int main(int argc, char **argv)
       offset = 512;
       l -= 512;
     } else {
-      fprintf(stderr, "Invalid file '%s'.\n", argv[1]);
+      fprintf(stderr, i18n->malformed_6d6_header);
       exit(1);
     }
   }
 
   outfile = fopen(argv[2], "wb");
   if (!outfile) {
-    fprintf(stderr, "Could not open '%s': %s.\n", argv[2], strerror(errno));
+    fprintf(stderr, i18n->could_not_open_ss, argv[2], strerror(errno));
     exit(1);
   }
 

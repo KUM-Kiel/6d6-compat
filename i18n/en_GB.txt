@@ -1,0 +1,175 @@
+###version_ss
+Version %s (%s)
+###invalid_cut
+Invalid value for '--cut'.
+###could_not_open_ss
+Could not open '%s': %s.
+###could_not_open_logfile_s
+Could not open logfile: %s.
+###invalid_station_code
+Please specify a station code of 1 to 5 alphanumeric characters with --station=CODE.
+###processing_s
+Processing '%s'.
+###out_of_memory
+Out of memory!
+###io_error
+I/O error!
+###io_error_d
+I/O error (%d)!
+###created_file_s
+Created file '%s'.
+###could_not_create_file_ss
+Could not create file '%s': %s.
+###malformed_6d6_header
+Malformed 6D6 header!
+###leapsec_outdated
+
+############################################################
+#                     !!! WARNING !!!                      #
+#         The leapsecond information is outdated.          #
+#         Please download the newest release here:         #
+#      https://github.com/KUM-Kiel/6d6-compat/releases     #
+############################################################
+
+###usage_6d6mseed_s
+Usage: %s [options] input.6d6
+
+The program '6d6mseed' is used to convert raw data from the 6D6 datalogger
+into the MiniSEED format.
+
+Options
+-------
+
+--station=CODE
+
+  Set the MiniSEED station code to CODE. The station code is required for
+  MiniSEED generation. It can contain between one and five alphanumeric
+  ASCII characters.
+
+--location=CODE
+
+  Set the location to CODE. This should usually be a two character code.
+
+--network=CODE
+
+  Set the network code to CODE. This is a two character code assigned by IRIS.
+
+--output=FILENAME_TEMPLATE
+
+  Set a template for output files. The template string may contain the following
+  placeholders:
+
+    %%y - Year
+    %%m - Month
+    %%d - Day
+    %%h - Hour
+    %%i - Minute
+    %%s - Second
+    %%S - Station Code
+    %%L - Location
+    %%C - Channel
+    %%N - Network
+
+  The default value is 'out/%%S/%%y-%%m-%%d-%%C.mseed'.
+
+--cut=SECONDS
+
+  Cut the data in files of SECONDS. The default value is 86400, i.e. one day.
+
+--logfile=FILE
+
+  Create a logfile at FILE.
+  The logfile contains all important information regarding recording data
+  and created files. It also lists errors which occured during processing.
+
+Examples
+--------
+
+Convert the file 'ST007.6d6' to MiniSEED using default values.
+
+  $ 6d6mseed --station=ST007 ST007.6d6
+
+Convert the file 'ST007.6d6' specifying everything.
+
+  $ 6d6mseed ST007.6d6 \
+      --station=ST007 \
+      --network=XX \
+      --output=%%N/%%S/%%y-%%m-%%d-%%C.mseed
+
+###usage_6d6info_s
+Usage: %s /dev/sdX1
+
+The program '6d6info' shows some information about a 6D6 recording.
+You can either use it on a StiK or SD card or to get some information
+about a .6d6 file on your hard drive.
+
+The parameter is the file or device you want to inspect.
+
+Examples
+--------
+
+Inspect the StiK in '/dev/sdb1':
+
+  $ 6d6info /dev/sdb1
+
+Inspect the file 'station-007.6d6' in the directory 'line-001':
+
+  $ 6d6info line-001/station-007.6d6
+
+###usage_6d6copy_s
+Usage: %s [-q|--no-progress] /dev/sdX1 out.6d6
+
+The program '6d6copy' makes a perfect copy of a StiK or 6D6 SD card
+to a file.
+This is a great backup mechanism and you can use the .6d6 files as a
+starting point for arbitrary data analysis methods.
+
+The first argument is the source of the data. This is normally your
+StiK or SD card device like '/dev/sdb1' or '/dev/mmcblk0p1'.
+The second argument is the file to which the copy will be made.
+This file should have a .6d6 ending to identify it as 6D6 raw data.
+
+When you start the program and the input and output files are valid,
+the copy operation begins and the progress is shown on the terminal.
+To suppress that progress display you can use the flags '-q' or
+'--no-progress'. This might be useful in automated scripts.
+
+Examples
+--------
+
+Archive the StiK in '/dev/sdb1' to a backup hard drive.
+
+  $ 6d6copy /dev/sdb1 /media/Backup/Experiment-003/Station-007.6d6
+
+Copy the SD card in '/dev/mmcblk0p1' to the current directory.
+
+  $ 6d6copy /dev/mmcblk0p1 Station-013.6d6
+
+###usage_6d6read_s
+Usage: %s [-q|--no-progress] < in.6d6 > out.s2x
+
+The program '6d6read' is used to convert raw data from the 6D6 datalogger
+into the Send2X format.
+This is useful if you still have a lot of old dataloggers and want to use
+a uniform method of data analysis.
+
+The input file is a .6d6 file and is written with an opening angle bracket '<'.
+The output file will be a .s2x file and is preceded by a closing angle
+bracket '>'.
+
+If the input file is a valid .6d6 file, the conversion process will begin and
+the progress will be reported to the terminal. If you want to suppress the
+progress display, you can use the flag '-q' or '--no-progress'. This might be
+useful in automated scripts.
+
+Examples
+--------
+
+Convert the file 'station-007.6d6' to Send2X format:
+
+  $ 6d6read < station-007.6d6 > station-007.s2x
+
+Convert the file 'x.6d6' to 'y.s2x' and suppress the progress display:
+
+  $ 6d6read --no-progress < x.6d6 > y.s2x
+

@@ -20,6 +20,8 @@
 #define WMSEED_IMPLEMENTATION
 #include "wmseed.h"
 
+#include "i18n.h"
+
 static FILE *_logfile = 0;
 static void log_entry(FILE *f, const char *format, ...)
 {
@@ -36,88 +38,23 @@ static void log_entry(FILE *f, const char *format, ...)
 
 static void fatal(const char *s)
 {
-  log_entry(stderr, "%s\n", s);
+  log_entry(stderr, "%s", s);
   exit(1);
 }
 
 static const char *program = "6d6mseed";
 static void help(const char *arg)
 {
-  fprintf(stdout, "Version %s (%s)\n",
+  fprintf(stdout, i18n->version_ss,
     KUM_6D6_COMPAT_VERSION, KUM_6D6_COMPAT_DATE);
-  fprintf(stdout,
-    "Usage: %s [options] input.6d6\n"
-    "\n"
-    "The program '6d6mseed' is used to convert raw data from the 6D6 datalogger\n"
-    "into the MiniSEED format.\n"
-    "\n"
-    "Options\n"
-    "-------\n"
-    "\n"
-    "--station=CODE\n"
-    "\n"
-    "  Set the MiniSEED station code to CODE. The station code is required for\n"
-    "  MiniSEED generation. It can contain between one and five ASCII characters.\n"
-    "\n"
-    "--location=CODE\n"
-    "\n"
-    "  Set the location to CODE. This should usually be a two character code.\n"
-    "\n"
-    "--network=CODE\n"
-    "\n"
-    "  Set the network code to CODE. This is a two character code assigned by IRIS.\n"
-    "\n"
-    "--output=FILENAME_TEMPLATE\n"
-    "\n"
-    "  Set a template for output files. The template string may contain the following\n"
-    "  placeholders:\n"
-    "\n"
-    "    %%y - Year\n"
-    "    %%m - Month\n"
-    "    %%d - Day\n"
-    "    %%h - Hour\n"
-    "    %%i - Minute\n"
-    "    %%s - Second\n"
-    "    %%S - Station Code\n"
-    "    %%L - Location\n"
-    "    %%C - Channel\n"
-    "    %%N - Network\n"
-    "\n"
-    "  The default value is 'out/%%S/%%y-%%m-%%d-%%C.mseed'.\n"
-    "\n"
-    "--cut=SECONDS\n"
-    "\n"
-    "  Cut the data in files of SECONDS. The default value is 86400, i.e. one day.\n"
-    "\n"
-    "--logfile=FILE\n"
-    "\n"
-    "  Create a logfile at FILE.\n"
-    "  The logfile contains all important information regarding recording data\n"
-    "  and created files. It also lists errors which occured during processing.\n"
-    "\n"
-    "Examples\n"
-    "--------\n"
-    "\n"
-    "Convert the file 'ST007.6d6' to MiniSEED using default values.\n"
-    "\n"
-    "  $ 6d6mseed --station=ST007 ST007.6d6\n"
-    "\n"
-    "Convert the file 'ST007.6d6' specifying everything.\n"
-    "\n"
-    "  $ 6d6mseed ST007.6d6 \\\n"
-    "      --station=ST007 \\\n"
-    "      --location=DE \\\n"
-    "      --network=XX \\\n"
-    "      --output=%%N/%%S/%%y-%%m-%%d-%%C.mseed\n"
-    "\n",
-    program);
+  fprintf(stdout, i18n->usage_6d6mseed_s, program);
   exit(1);
 }
 
 static void read_block(uint8_t *block, FILE *f)
 {
   if (fread(block, 512, 1, f) != 1) {
-    log_entry(stderr, "I/O error\n");
+    log_entry(stderr, i18n->io_error);
     exit(1);
   }
 }
@@ -174,20 +111,13 @@ int main(int argc, char **argv)
   char *logfile = 0;
   int cut = 86400;
 
-  int outdated = tai_leapsecs_need_update(tai_now());
-
   int progress = 1;
 
+  i18n_set_lang(getenv("LANG"));
+
+  int outdated = tai_leapsecs_need_update(tai_now());
   if (outdated) {
-    fprintf(stderr,
-      "\n"
-      "############################################################\n"
-      "#                     !!! WARNING !!!                      #\n"
-      "#         The leapsecond information is outdated.          #\n"
-      "#         Please download the newest release here:         #\n"
-      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
-      "############################################################\n"
-      "\n");
+    fprintf(stderr, i18n->leapsec_outdated);
   }
 
   program = argv[0];
@@ -206,12 +136,12 @@ int main(int argc, char **argv)
   if (cut_string) {
     int n = 0;
     while (*cut_string) {
-      if (*cut_string < '0' || *cut_string > '9') fatal("Invalid value for '--cut'.");
-      if (__builtin_mul_overflow(n, 10, &n)) fatal("Invalid value for '--cut'.");
-      if (__builtin_add_overflow(n, *cut_string - '0', &n)) fatal("Invalid value for '--cut'.");
+      if (*cut_string < '0' || *cut_string > '9') fatal(i18n->invalid_cut);
+      if (__builtin_mul_overflow(n, 10, &n)) fatal(i18n->invalid_cut);
+      if (__builtin_add_overflow(n, *cut_string - '0', &n)) fatal(i18n->invalid_cut);
       ++cut_string;
     }
-    if (n < 300 || n > 86400 * 60) fatal("Invalid value for '--cut'.");
+    if (n < 300 || n > 86400 * 60) fatal(i18n->invalid_cut);
     cut = n;
   }
 
@@ -233,7 +163,7 @@ int main(int argc, char **argv)
       filename = str;
       input = fopen(filename, "rb");
       if (!input) {
-        fprintf(stderr, "Could not open '%s': %s.\n", argv[1], strerror(e));
+        fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
         exit(1);
       }
     }
@@ -248,42 +178,33 @@ int main(int argc, char **argv)
   if (logfile) {
     _logfile = fopen(logfile, "wb");
     if (!_logfile) {
-      fprintf(stderr, "Could not open logfile: %s.\n", strerror(errno));
+      fprintf(stderr, i18n->could_not_open_logfile_s, strerror(errno));
     }
   }
 
   /* Check the leapsecond information. */
   if (outdated && _logfile) {
-    fprintf(_logfile,
-      "\n"
-      "############################################################\n"
-      "#                     !!! WARNING !!!                      #\n"
-      "#         The leapsecond information is outdated.          #\n"
-      "#         Please download the newest release here:         #\n"
-      "#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n"
-      "############################################################\n"
-      "\n");
+    fprintf(_logfile, i18n->leapsec_outdated);
   }
 
   if (!station || strlen(station) <= 0 || strlen(station) > 5 || !alphanum(station)) {
-    fprintf(stderr, "Please specify a station code of 1 to 5 alphanumeric characters with --station=code.\n");
-    return 1;
+    fatal(i18n->invalid_station_code);
   }
 
-  log_entry(stderr, "Processing '%s'.\n", filename);
+  log_entry(stderr, i18n->processing_s, filename);
   log_entry(stderr, "============================================================\n");
 
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
-      log_entry(stderr, "Malformed 6D6 start header!\n");
+      log_entry(stderr, i18n->malformed_6d6_header);
       exit(1);
     }
   }
   read_block(block, input);
   if (kum_6d6_header_read(&h_end, block) == -1) {
-    log_entry(stderr, "Malformed 6D6 end header!\n");
+    log_entry(stderr, i18n->malformed_6d6_header);
     exit(1);
   }
 
