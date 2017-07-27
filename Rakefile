@@ -15,6 +15,7 @@ C.library 'tai', [
 
 C.library 'i18n', [
   'i18n.c',
+  'i18n_error.c',
 ]
 
 C.library '6d6', [

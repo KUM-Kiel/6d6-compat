@@ -7,6 +7,12 @@ typedef struct {
   const char *could_not_open_logfile_s;
   const char *could_not_open_ss;
   const char *created_file_s;
+  const char *errno_eacces;
+  const char *errno_eagain;
+  const char *errno_edquot;
+  const char *errno_eexist;
+  const char *errno_einval;
+  const char *errno_enoent;
   const char *invalid_cut;
   const char *invalid_station_code;
   const char *io_error;
@@ -60,6 +66,12 @@ static I18n _en_GB = {
   .could_not_open_logfile_s = "Could not open logfile: %s.\n",
   .could_not_open_ss = "Could not open '%s': %s.\n",
   .created_file_s = "Created file '%s'.\n",
+  .errno_eacces = "Permission denied",
+  .errno_eagain = "The operation would block",
+  .errno_edquot = "Quota exhausted",
+  .errno_eexist = "The target already exists",
+  .errno_einval = "Invalid argument",
+  .errno_enoent = "No such file or directory",
   .invalid_cut = "Invalid value for '--cut'.\n",
   .invalid_station_code = "Please specify a station code of 1 to 5 alphanumeric characters with --station=CODE.\n",
   .io_error = "I/O error!\n",
@@ -89,8 +101,14 @@ I18n *en_GB = &_en_GB;
 static I18n _de_DE = {
   .could_not_create_file_ss = "Konnte Datei '%s' nicht erstellen: %s.\n",
   .could_not_open_logfile_s = "Konnte Logdatei nicht öffnen: %s.\n",
-  .could_not_open_ss = "Konnte Datei '%s' nicht öffnen: %s.\n",
+  .could_not_open_ss = "Konnte '%s' nicht öffnen: %s.\n",
   .created_file_s = "Datei '%s' erstellt.\n",
+  .errno_eacces = "Zugriff verweigert",
+  .errno_eagain = "Die Operation würde blockieren",
+  .errno_edquot = "Das Kontingent wurde ausgeschöpft",
+  .errno_eexist = "Das Ziel existiert bereits",
+  .errno_einval = "Ungültiges Argument",
+  .errno_enoent = "Die Datei oder das Verzeichnis existiert nicht",
   .invalid_cut = "Ungültiger Wert für '--cut'.\n",
   .invalid_station_code = "Bitte geben Sie einen Stationscode von 1 bis 5 alphanumerischen Zeichen mit\n--station=CODE an.\n",
   .io_error = "I/O-Fehler!\n",

@@ -4,7 +4,7 @@
 ###invalid_cut
 Ungültiger Wert für '--cut'.
 ###could_not_open_ss
-Konnte Datei '%s' nicht öffnen: %s.
+Konnte '%s' nicht öffnen: %s.
 ###could_not_open_logfile_s
 Konnte Logdatei nicht öffnen: %s.
 ###invalid_station_code
@@ -46,6 +46,18 @@ Beschädigter 6D6-Header!
  Dateigröße:
 ####label_comment
   Kommentar:
+####errno_eacces
+Zugriff verweigert
+####errno_eagain
+Die Operation würde blockieren
+####errno_edquot
+Das Kontingent wurde ausgeschöpft
+####errno_eexist
+Das Ziel existiert bereits
+####errno_einval
+Ungültiges Argument
+####errno_enoent
+Die Datei oder das Verzeichnis existiert nicht
 ###leapsec_outdated
 
 ############################################################

@@ -8,6 +8,7 @@
 #include "options.h"
 #include "version.h"
 #include "i18n.h"
+#include "i18n_error.h"
 
 const char *program = "6d6copy";
 static void help(const char *arg)
@@ -50,7 +51,7 @@ int main(int argc, char **argv)
     snprintf(buffer, sizeof(buffer), "/dev/%s", argv[1]);
     infile = fopen(buffer, "rb");
     if (!infile) {
-      fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
+      fprintf(stderr, i18n->could_not_open_ss, argv[1], i18n_error(e));
       exit(1);
     }
   }
@@ -73,7 +74,7 @@ int main(int argc, char **argv)
 
   outfile = fopen(argv[2], "wb");
   if (!outfile) {
-    fprintf(stderr, i18n->could_not_open_ss, argv[2], strerror(errno));
+    fprintf(stderr, i18n->could_not_open_ss, argv[2], i18n_error(errno));
     exit(1);
   }
 

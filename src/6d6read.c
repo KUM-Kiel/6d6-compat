@@ -13,6 +13,7 @@
 #include "s2x_channel.h"
 #include "version.h"
 #include "i18n.h"
+#include "i18n_error.h"
 
 static const char *program = "6d6read";
 static void help(const char *arg)
@@ -112,7 +113,7 @@ int main(int argc, char **argv)
         snprintf(str, sizeof(str), "/dev/%s", argv[1]);
         input = fopen(str, "rb");
         if (!input) {
-          fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
+          fprintf(stderr, i18n->could_not_open_ss, argv[1], i18n_error(e));
           exit(1);
         }
       }

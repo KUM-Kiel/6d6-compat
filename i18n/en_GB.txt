@@ -45,6 +45,18 @@ Sample Rate:
        Size:
 ####label_comment
     Comment:
+####errno_eacces
+Permission denied
+####errno_eagain
+The operation would block
+####errno_edquot
+Quota exhausted
+####errno_eexist
+The target already exists
+####errno_einval
+Invalid argument
+####errno_enoent
+No such file or directory
 ###leapsec_outdated
 
 ############################################################

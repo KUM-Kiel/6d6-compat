@@ -13,14 +13,14 @@
 #include "options.h"
 #include "version.h"
 #include "tai.h"
+#include "i18n.h"
+#include "i18n_error.h"
 #define MINISEED_IMPLEMENTATION
 #include "miniseed.h"
 #define SAMPLEBUFFER_IMPLEMENTATION
 #include "samplebuffer.h"
 #define WMSEED_IMPLEMENTATION
 #include "wmseed.h"
-
-#include "i18n.h"
 
 static FILE *_logfile = 0;
 static void log_entry(FILE *f, const char *format, ...)
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
       filename = str;
       input = fopen(filename, "rb");
       if (!input) {
-        fprintf(stderr, i18n->could_not_open_ss, argv[1], strerror(e));
+        fprintf(stderr, i18n->could_not_open_ss, argv[1], i18n_error(e));
         exit(1);
       }
     }
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
   if (logfile) {
     _logfile = fopen(logfile, "wb");
     if (!_logfile) {
-      fprintf(stderr, i18n->could_not_open_logfile_s, strerror(errno));
+      fprintf(stderr, i18n->could_not_open_logfile_s, i18n_error(errno));
     }
   }
 
