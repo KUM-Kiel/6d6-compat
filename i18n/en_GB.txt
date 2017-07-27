@@ -1,5 +1,6 @@
 ###version_ss
-Version %s (%s)
+6D6 Compatibility Tools Version %s (%s)
+
 ###invalid_cut
 Invalid value for '--cut'.
 ###could_not_open_ss
@@ -32,10 +33,16 @@ Malformed 6D6 header!
 ############################################################
 
 ###usage_6d6mseed_s
-Usage: %s [options] input.6d6
+6d6mseed
+========
 
 The program '6d6mseed' is used to convert raw data from the 6D6 datalogger
 into the MiniSEED format.
+
+Usage
+-----
+
+  %s [options] input.6d6
 
 Options
 -------
@@ -97,11 +104,17 @@ Convert the file 'ST007.6d6' specifying everything.
       --output=%%N/%%S/%%y-%%m-%%d-%%C.mseed
 
 ###usage_6d6info_s
-Usage: %s /dev/sdX1
+6d6info
+=======
 
 The program '6d6info' shows some information about a 6D6 recording.
 You can either use it on a StiK or SD card or to get some information
 about a .6d6 file on your hard drive.
+
+Usage
+-----
+
+  %s /dev/sdX1
 
 The parameter is the file or device you want to inspect.
 
@@ -117,12 +130,18 @@ Inspect the file 'station-007.6d6' in the directory 'line-001':
   $ 6d6info line-001/station-007.6d6
 
 ###usage_6d6copy_s
-Usage: %s [-q|--no-progress] /dev/sdX1 out.6d6
+6d6copy
+=======
 
 The program '6d6copy' makes a perfect copy of a StiK or 6D6 SD card
 to a file.
 This is a great backup mechanism and you can use the .6d6 files as a
 starting point for arbitrary data analysis methods.
+
+Usage
+-----
+
+  %s [-q|--no-progress] /dev/sdX1 out.6d6
 
 The first argument is the source of the data. This is normally your
 StiK or SD card device like '/dev/sdb1' or '/dev/mmcblk0p1'.
@@ -146,12 +165,18 @@ Copy the SD card in '/dev/mmcblk0p1' to the current directory.
   $ 6d6copy /dev/mmcblk0p1 Station-013.6d6
 
 ###usage_6d6read_s
-Usage: %s [-q|--no-progress] < in.6d6 > out.s2x
+6d6read
+=======
 
 The program '6d6read' is used to convert raw data from the 6D6 datalogger
 into the Send2X format.
 This is useful if you still have a lot of old dataloggers and want to use
 a uniform method of data analysis.
+
+Usage
+-----
+
+  %s [-q|--no-progress] < in.6d6 > out.s2x
 
 The input file is a .6d6 file and is written with an opening angle bracket '<'.
 The output file will be a .s2x file and is preceded by a closing angle

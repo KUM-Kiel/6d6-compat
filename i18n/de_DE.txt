@@ -1,5 +1,6 @@
 ###version_ss
-Version %s (%s)
+6D6 Compatibility Tools Version %s (%s)
+
 ###invalid_cut
 Ungültiger Wert für '--cut'.
 ###could_not_open_ss
@@ -33,10 +34,16 @@ Beschädigter 6D6-Header!
 ############################################################
 
 ###usage_6d6mseed_s
-Verwendung: %s [Optionen] input.6d6
+6d6mseed
+========
 
 Das Programm '6d6mseed' konvertiert Rohdaten des 6D6-Datenloggers in das
 MiniSEED-Format.
+
+Verwendung
+----------
+
+  %s [Optionen] input.6d6
 
 Optionen
 --------
@@ -104,11 +111,17 @@ MiniSEED-Dateinamen.
       --output=%%N/%%S/%%y-%%m-%%d-%%C.mseed
 
 ###usage_6d6info_s
-Verwendung: %s /dev/sdX1
+6d6info
+=======
 
 Das Programm '6d6info' zeigt Informationen zu einer 6D6-Aufnahme an.
 Es kann entweder direkt mit einem StiK oder einer SD-Karte verwendet werden oder
 Informationen über eine .6d6-Datei auf der Festplatte anzeigen.
+
+Verwendung
+----------
+
+  %s /dev/sdX1
 
 Der Parameter ist die Datei oder das Gerät, das untersucht werden soll.
 
@@ -124,13 +137,19 @@ Zeigt Informationen zur Datei 'station-007.6d6' im Ordner 'line-001':
   $ 6d6info line-001/station-007.6d6
 
 ###usage_6d6copy_s
-Verwendung: %s [-q|--no-progress] /dev/sdX1 out.6d6
+6d6copy
+=======
 
 Das Programm '6d6copy' erstellt eine 1:1-Kopie eines StiKs oder einer SD-Karte
 in eine .6d6-Datei.
 Eine .6d6-Datei ist besonders für Backups geeignet, da sie alle Rohdaten in
 unveränderter Form enthält. Sie ist somit auch prädestinierter Startpunkt für
 beliebige Datenanalysen und Konvertierungen.
+
+Verwendung
+----------
+
+  %s [-q|--no-progress] /dev/sdX1 out.6d6
 
 Der erste Parameter ist die Quelldatei. Dies ist normalerweise der Gerätepfad
 des StiKs oder der SD-Karte und sieht ähnlich aus wie '/dev/sdb1' oder
@@ -156,22 +175,23 @@ Kopiert die SD-Karte in '/dev/mmcblk0p1' ins aktuelle Verzeichnis.
   $ 6d6copy /dev/mmcblk0p1 Station-013.6d6
 
 ###usage_6d6read_s
-Verwendung: %s [-q|--no-progress] < in.6d6 > out.s2x
+6d6read
+=======
 
 Das Programm '6d6read' konvertiert Rohdaten vom 6D6-Datenlogger in das
 Send2X-Format.
 Dies kann nützlich sein, wenn noch eine große Anzahl von alten Datenloggern
 vorhanden ist und eine einheitliche Datenverarbeitung gewünscht ist.
 
+Verwendung
+----------
+
+  %s [-q|--no-progress] < in.6d6 > out.s2x
+
 Die Eingabedatei ist eine .6d6-Datei und wird mit einer öffnenden spitzen
 Klammer angegeben '<'.
 Die Ausgabedatei ist eine .s2x-Datei und wird mit einer schließenden spitzen
 Klammer angegeben '>'.
-
-If the input file is a valid .6d6 file, the conversion process will begin and
-the progress will be reported to the terminal. If you want to suppress the
-progress display, you can use the flag '-q' or '--no-progress'. This might be
-useful in automated scripts.
 
 Wenn Eingabedatei eine gültige .6d6-Datei ist, beginnt der Konvertierungs-
 vorgang und der Fortschritt wird im Terminal angezeigt. Um die Ausgabe z.B. für
