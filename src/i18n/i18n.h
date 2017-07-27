@@ -11,6 +11,17 @@ typedef struct {
   const char *invalid_station_code;
   const char *io_error;
   const char *io_error_d;
+  const char *label_6d6_sn;
+  const char *label_blank;
+  const char *label_comment;
+  const char *label_duration;
+  const char *label_end_time;
+  const char *label_sample_rate;
+  const char *label_size;
+  const char *label_skew;
+  const char *label_skew_time;
+  const char *label_start_time;
+  const char *label_sync_time;
   const char *leapsec_outdated;
   const char *malformed_6d6_header;
   const char *out_of_memory;
@@ -53,6 +64,17 @@ static I18n _en_GB = {
   .invalid_station_code = "Please specify a station code of 1 to 5 alphanumeric characters with --station=CODE.\n",
   .io_error = "I/O error!\n",
   .io_error_d = "I/O error (%d)!\n",
+  .label_6d6_sn = "    6D6 S/N:",
+  .label_blank = "           :",
+  .label_comment = "    Comment:",
+  .label_duration = "   Duration:",
+  .label_end_time = "   End Time:",
+  .label_sample_rate = "Sample Rate:",
+  .label_size = "       Size:",
+  .label_skew = "       Skew:",
+  .label_skew_time = "  Skew Time:",
+  .label_start_time = " Start Time:",
+  .label_sync_time = "  Sync Time:",
   .leapsec_outdated = "\n############################################################\n#                     !!! WARNING !!!                      #\n#         The leapsecond information is outdated.          #\n#         Please download the newest release here:         #\n#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n############################################################\n\n",
   .malformed_6d6_header = "Malformed 6D6 header!\n",
   .out_of_memory = "Out of memory!\n",
@@ -73,6 +95,17 @@ static I18n _de_DE = {
   .invalid_station_code = "Bitte geben Sie einen Stationscode von 1 bis 5 alphanumerischen Zeichen mit\n--station=CODE an.\n",
   .io_error = "I/O-Fehler!\n",
   .io_error_d = "I/O-Fehler (%d)!\n",
+  .label_6d6_sn = "    6D6 S/N:",
+  .label_blank = "           :",
+  .label_comment = "  Kommentar:",
+  .label_duration = "      Dauer:",
+  .label_end_time = "    Endzeit:",
+  .label_sample_rate = " Abtastrate:",
+  .label_size = " Dateigröße:",
+  .label_skew = "       Skew:",
+  .label_skew_time = "  Skew-Zeit:",
+  .label_start_time = "  Startzeit:",
+  .label_sync_time = "  Sync-Zeit:",
   .leapsec_outdated = "\n############################################################\n#                     !!! WARNUNG !!!                      #\n#  Die Schaltsekundeninformation ist nicht mehr aktuell.   #\n#    Bitte laden Sie die neuste Version hier herunter:     #\n#     https://github.com/KUM-Kiel/6d6-compat/releases      #\n############################################################\n\n",
   .malformed_6d6_header = "Beschädigter 6D6-Header!\n",
   .out_of_memory = "Arbeitsspeicher ist voll!\n",

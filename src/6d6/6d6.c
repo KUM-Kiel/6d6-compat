@@ -5,6 +5,7 @@
 #include "number.h"
 #include "bcd.h"
 #include "tai.h"
+#include "i18n.h"
 
 #define X ((const uint8_t *) x)
 #define SX ((const char *) x)
@@ -205,6 +206,7 @@ int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end
   Time start_time, end_time, sync_time, skew_time = 0;
   Date d;
   double skew = 0;
+  int i;
 
   if (start_header->sync_type != KUM_6D6_SYNC) return -1;
   /* Calculate times. */
@@ -222,29 +224,42 @@ int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end
   }
 
   /* Show all the info. */
-  fprintf(f, "    6D6 S/N: %s\n", start_header->recorder_id);
+  fprintf(f, "%s %s\n", i18n->label_6d6_sn, start_header->recorder_id);
   d = tai_date(start_time, 0, 0);
-  fprintf(f, " Start Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+  fprintf(f, "%s %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    i18n->label_start_time,
     d.year, d.month, d.day, d.hour, d.min, d.sec);
   d = tai_date(end_time, 0, 0);
-  fprintf(f, "   End Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+  fprintf(f, "%s %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    i18n->label_end_time,
     d.year, d.month, d.day, d.hour, d.min, d.sec);
   d = tai_date(sync_time, 0, 0);
-  fprintf(f, "  Sync Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+  fprintf(f, "%s %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    i18n->label_sync_time,
     d.year, d.month, d.day, d.hour, d.min, d.sec);
   if (end_header->sync_type == KUM_6D6_SKEW) {
     d = tai_date(skew_time, 0, 0);
-    fprintf(f, "  Skew Time: %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+    fprintf(f, "%s %4d-%02d-%02d %02d:%02d:%02d UTC\n",
+      i18n->label_skew_time,
       d.year, d.month, d.day, d.hour, d.min, d.sec);
-    fprintf(f, "       Skew: %" PRId64 "µs (%.3fppm)\n", end_header->skew, skew);
+    fprintf(f, "%s %" PRId64 "µs (%.3fppm)\n",
+      i18n->label_skew,
+      end_header->skew, skew);
   }
   format_duration(bcd_diff((char *) start_header->start_time, (char *) end_header->start_time), buffer, sizeof(buffer));
-  fprintf(f, "   Duration: %s\n", buffer);
-  fprintf(f, "Sample Rate: %d SPS\n", start_header->sample_rate);
-  fprintf(f, "       Size: %.1f MB\n", end_header->address * 512.0 / 1e6);
+  fprintf(f, "%s %s\n",
+    i18n->label_duration, buffer);
+  fprintf(f, "%s %d SPS\n",
+    i18n->label_sample_rate, start_header->sample_rate);
+  fprintf(f, "%s %.1f MB\n",
+    i18n->label_size, end_header->address * 512.0 / 1e6);
 
-  fprintf(f, "    Comment: ");
-  print_leftpad(f, (char *) start_header->comment, "             ");
+  fprintf(f, "%s ", i18n->label_comment);
+  for (i = 0; i < strlen(i18n->label_blank) + 1; ++i) {
+    buffer[i] = ' ';
+  }
+  buffer[i] = 0;
+  print_leftpad(f, (char *) start_header->comment, buffer);
 
   return 0;
 }

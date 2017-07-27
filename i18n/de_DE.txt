@@ -24,6 +24,28 @@ Datei '%s' erstellt.
 Konnte Datei '%s' nicht erstellen: %s.
 ###malformed_6d6_header
 Beschädigter 6D6-Header!
+####label_blank
+           :
+####label_6d6_sn
+    6D6 S/N:
+####label_start_time
+  Startzeit:
+####label_end_time
+    Endzeit:
+####label_sync_time
+  Sync-Zeit:
+####label_skew_time
+  Skew-Zeit:
+####label_skew
+       Skew:
+####label_duration
+      Dauer:
+####label_sample_rate
+ Abtastrate:
+####label_size
+ Dateigröße:
+####label_comment
+  Kommentar:
 ###leapsec_outdated
 
 ############################################################
