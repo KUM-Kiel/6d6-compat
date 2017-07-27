@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- `6d6info`, `6d6copy`, `6d6mseed` and `6d6read` now support multiple languages.
 
 ## [1.2.6] - 2017-07-26
 ### Added
