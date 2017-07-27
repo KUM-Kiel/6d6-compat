@@ -217,7 +217,7 @@ int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end
   if (end_header->sync_type == KUM_6D6_SKEW) {
     skew_time = bcd_time(end_header->sync_time);
     end_header->skew += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
-    skew = (double) (end_header->skew - start_header->skew) / (skew_time - sync_time);
+    skew = 1e6 * (end_header->skew - start_header->skew) / (skew_time - sync_time);
     skew_time += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
   }
 
