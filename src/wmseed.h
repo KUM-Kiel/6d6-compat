@@ -49,14 +49,16 @@ __attribute__((format(printf, 3, 4)))
 static void wmseed__log(WMSeed *w, FILE *f, const char *format, ...)
 {
   va_list args;
-  va_start(args, format);
   if (w && w->logfile) {
+    va_start(args, format);
     vfprintf(w->logfile, format, args);
+    va_end(args);
     fflush(w->logfile);
   }
+  va_start(args, format);
   vfprintf(f, format, args);
-  fflush(f);
   va_end(args);
+  fflush(f);
 }
 
 static void *wmseed__allocate(WMSeed *w, void *x, size_t size)

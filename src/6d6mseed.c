@@ -26,14 +26,16 @@ static FILE *_logfile = 0;
 static void log_entry(FILE *f, const char *format, ...)
 {
   va_list args;
-  va_start(args, format);
   if (_logfile) {
+    va_start(args, format);
     vfprintf(_logfile, format, args);
+    va_end(args);
     fflush(_logfile);
   }
+  va_start(args, format);
   vfprintf(f, format, args);
-  fflush(f);
   va_end(args);
+  fflush(f);
 }
 
 static void fatal(const char *s)
@@ -98,12 +100,17 @@ int main(int argc, char **argv)
   uint32_t i, j;
   int c, e;
   Time start_time, sync_time, skew_time = 0, t;
+  Date d;
   double skew = 1;
   int have_skew = 0;
   /* Block parser. */
   int pos, remaining = 0, have_time = 0;
   int32_t frame[KUM_6D6_MAX_CHANNEL_COUNT];
   int64_t sample_number = 0;
+
+  FILE *aux = 0;
+  char *aux_path = 0;
+  int temperature = 0, humidity = 0, vbat = 0;
 
   char *station = 0, *location = "", *network = "";
   char *template = 0;
@@ -130,7 +137,8 @@ int main(int argc, char **argv)
     PARAMETER(0, "network", network),
     PARAMETER(0, "output", template),
     PARAMETER('c', "cut", cut_string),
-    PARAMETER('l', "logfile", logfile)
+    PARAMETER('l', "logfile", logfile),
+    PARAMETER('x', "auxfile", aux_path)
   ));
 
   if (cut_string) {
@@ -179,6 +187,17 @@ int main(int argc, char **argv)
     _logfile = fopen(logfile, "wb");
     if (!_logfile) {
       fprintf(stderr, i18n->could_not_open_logfile_s, i18n_error(errno));
+    }
+  }
+
+  /* Create the aux file. */
+  if (aux_path) {
+    aux = fopen(aux_path, "wb");
+    if (!aux) {
+      fprintf(stderr, i18n->could_not_open_ss, aux_path, i18n_error(errno));
+    } else {
+      fprintf(aux, "Time,Temperature [°C],Humidity [%%],Battery Voltage [V]\n");
+      fflush(aux);
     }
   }
 
@@ -274,8 +293,19 @@ int main(int argc, char **argv)
             }
             break;
           case 3: /* VBat/Humidity */
+            vbat = frame[1] >> 16;
+            humidity = frame[1] & 0xffff;
             break;
           case 5: /* Temperature */
+            temperature = frame[1] >> 16;
+            if (aux) {
+              d = tai_date(t, 0, 0);
+              fprintf(aux,
+                "%04d-%02d-%02d %02d:%02d:%02d UTC,%.2f,%d,%.2f\n",
+                d.year, d.month, d.day, d.hour, d.min, d.sec,
+                temperature * 0.01, humidity, vbat * 0.01);
+              fflush(aux);
+            }
             break;
           case 7: /* Lost Frames */
             break;

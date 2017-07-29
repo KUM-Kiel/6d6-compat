@@ -138,6 +138,12 @@ Optionen
   auftreten. Das sind hauptsächlich allgemeine Informationen über die Daten,
   Namen von erstellten Dateien und eventuelle Fehler.
 
+--auxfile=FILE
+
+  Erstellt eine CSV-Datei mit zusätzlichen Daten unter FILE.
+  Die CSV-Datei enthält die Statusdaten des Datenloggers, wie z.B. Temperatur
+  oder Batteriespannung.
+
 Beispiele
 ---------
 

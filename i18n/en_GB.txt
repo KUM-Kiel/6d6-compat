@@ -133,6 +133,12 @@ Options
   The logfile contains all important information regarding recording data
   and created files. It also lists errors which occured during processing.
 
+--auxfile=FILE
+
+  Create a CSV file with auxiliary data at FILE.
+  The auxfile contains engineering data like the temperature and battery
+  voltage.
+
 Examples
 --------
 
