@@ -58,6 +58,16 @@ Das Ziel existiert bereits
 Ungültiges Argument
 ####errno_enoent
 Die Datei oder das Verzeichnis existiert nicht
+###need_argument_long_s
+Die Option '--%s' benötigt ein Argument.
+###need_argument_short_c
+Die Option '-%c' benötigt ein Argument.
+###unrecognised_long_s
+Unbekannte Option '--%s'.
+###unrecognised_short_c
+Unbekannte Option '-%c'.
+###unexpected_argument_s
+Die Option '--%s' benötigt kein Argument.
 ###leapsec_outdated
 
 ############################################################

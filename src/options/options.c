@@ -12,28 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define NEED_ARGUMENT_LONG  "Option '--\0' needs an argument."
-#define NEED_ARGUMENT_SHORT "Option '-\0' needs an argument."
-#define UNRECOGNISED_LONG   "Unrecognised option '--\0'."
-#define UNRECOGNISED_SHORT  "Unrecognised option '-\0'."
-#define UNEXPECTED_ARGUMENT "Option '--\0' expects no argument."
-
-static int fprintfs(FILE* f, const char *format, const char *str)
-{
-  while (*format) putc(*(format++), f); format++;
-  while (*str)    putc(*(str++), f);
-  while (*format) putc(*(format++), f);
-  return 0;
-}
-
-static int fprintfc(FILE* f, const char *format, char c)
-{
-  while (*format) putc(*(format++), f); format++;
-  putc(c, f);
-  while (*format) putc(*(format++), f);
-  return 0;
-}
-
+#include "i18n.h"
 
 static int str_equal(const char *a, const char *b)
 {
@@ -50,7 +29,7 @@ static option_t *lookup_short(option_t **o, char n)
     }
     ++o;
   }
-  fprintfc(stderr, UNRECOGNISED_SHORT "\n", n);
+  fprintf(stderr, i18n->unrecognised_short_c, n);
   exit(1);
   return 0;
 }
@@ -63,7 +42,7 @@ static option_t *lookup_long(option_t **o, char *n)
     }
     ++o;
   }
-  fprintfs(stderr, UNRECOGNISED_LONG "\n", n);
+  fprintf(stderr, i18n->unrecognised_long_s, n);
   exit(1);
   return 0;
 }
@@ -91,9 +70,9 @@ static void apply_option(option_t *o, char *arg, int l)
   }
   if (!arg && HAS_PARAMETER(o) && !HAS_DEFAULT(o)) {
     if (l) {
-      fprintfs(stderr, NEED_ARGUMENT_LONG "\n", o->longopt);
+      fprintf(stderr, i18n->need_argument_long_s, o->longopt);
     } else {
-      fprintfc(stderr, NEED_ARGUMENT_SHORT "\n", o->shortopt);
+      fprintf(stderr, i18n->need_argument_short_c, o->shortopt);
     }
     exit(1);
   }
@@ -141,7 +120,7 @@ int parse_options(int *argc, char ***argv, option_t **options)
         o = lookup_long(options, a);
         if (v || !HAS_PARAMETER(o)) {
           if (v && !HAS_PARAMETER(o)) {
-            fprintfs(stderr, UNEXPECTED_ARGUMENT "\n", o->longopt);
+            fprintf(stderr, i18n->unexpected_argument_s, o->longopt);
             exit(1);
           }
           apply_option(o, v, l);

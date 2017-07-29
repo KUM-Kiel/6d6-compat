@@ -57,6 +57,16 @@ The target already exists
 Invalid argument
 ####errno_enoent
 No such file or directory
+###need_argument_long_s
+Option '--%s' needs an argument.
+###need_argument_short_c
+Option '-%c' needs an argument.
+###unrecognised_long_s
+Unrecognised option '--%s'.
+###unrecognised_short_c
+Unrecognised option '-%c'.
+###unexpected_argument_s
+Option '--%s' expects no argument.
 ###leapsec_outdated
 
 ############################################################
