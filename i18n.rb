@@ -43,9 +43,9 @@ class I18n
       end
       f.puts '} I18n;'
       @langs.each do |l|
-        f.puts "extern I18n *#{l};"
+        f.puts "extern const I18n *#{l};"
       end
-      f.puts 'extern I18n *i18n;'
+      f.puts 'extern const I18n *i18n;'
       f.puts "static inline void i18n_set_lang(const char *lang)"
       f.puts "{"
       f.puts "  if (!lang) {"
@@ -103,9 +103,9 @@ class I18n
           f.puts "  .#{k} = #{v.inspect},"
         end
         f.puts '};'
-        f.puts "I18n *#{lang} = &_#{lang};"
+        f.puts "const I18n *#{lang} = &_#{lang};"
       end
-      f.puts "I18n *i18n = &_#{@langs.first};"
+      f.puts "const I18n *i18n = &_#{@langs.first};"
       f.puts '#endif'
     end
   end

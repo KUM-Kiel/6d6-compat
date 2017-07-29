@@ -43,9 +43,9 @@ typedef struct {
   const char *usage_6d6read_s;
   const char *version_ss;
 } I18n;
-extern I18n *en_GB;
-extern I18n *de_DE;
-extern I18n *i18n;
+extern const I18n *en_GB;
+extern const I18n *de_DE;
+extern const I18n *i18n;
 static inline void i18n_set_lang(const char *lang)
 {
   if (!lang) {
@@ -107,7 +107,7 @@ static I18n _en_GB = {
   .usage_6d6read_s = "6d6read\n=======\n\nThe program '6d6read' is used to convert raw data from the 6D6 datalogger\ninto the Send2X format.\nThis is useful if you still have a lot of old dataloggers and want to use\na uniform method of data analysis.\n\nUsage\n-----\n\n  %s [-q|--no-progress] < in.6d6 > out.s2x\n\nThe input file is a .6d6 file and is written with an opening angle bracket '<'.\nThe output file will be a .s2x file and is preceded by a closing angle\nbracket '>'.\n\nIf the input file is a valid .6d6 file, the conversion process will begin and\nthe progress will be reported to the terminal. If you want to suppress the\nprogress display, you can use the flag '-q' or '--no-progress'. This might be\nuseful in automated scripts.\n\nExamples\n--------\n\nConvert the file 'station-007.6d6' to Send2X format:\n\n  $ 6d6read < station-007.6d6 > station-007.s2x\n\nConvert the file 'x.6d6' to 'y.s2x' and suppress the progress display:\n\n  $ 6d6read --no-progress < x.6d6 > y.s2x\n\n",
   .version_ss = "6D6 Compatibility Tools Version %s (%s)\n\n",
 };
-I18n *en_GB = &_en_GB;
+const I18n *en_GB = &_en_GB;
 static I18n _de_DE = {
   .could_not_create_file_ss = "Konnte Datei '%s' nicht erstellen: %s.\n",
   .could_not_open_logfile_s = "Konnte Logdatei nicht öffnen: %s.\n",
@@ -149,6 +149,6 @@ static I18n _de_DE = {
   .usage_6d6read_s = "6d6read\n=======\n\nDas Programm '6d6read' konvertiert Rohdaten vom 6D6-Datenlogger in das\nSend2X-Format.\nDies kann nützlich sein, wenn noch eine große Anzahl von alten Datenloggern\nvorhanden ist und eine einheitliche Datenverarbeitung gewünscht ist.\n\nVerwendung\n----------\n\n  %s [-q|--no-progress] < in.6d6 > out.s2x\n\nDie Eingabedatei ist eine .6d6-Datei und wird mit einer öffnenden spitzen\nKlammer angegeben '<'.\nDie Ausgabedatei ist eine .s2x-Datei und wird mit einer schließenden spitzen\nKlammer angegeben '>'.\n\nWenn Eingabedatei eine gültige .6d6-Datei ist, beginnt der Konvertierungs-\nvorgang und der Fortschritt wird im Terminal angezeigt. Um die Ausgabe z.B. für\nautomatisierte Scripts zu unterdrücken, kann die Option '-q' bzw.\n'--no-progress' verwendet werden.\n\nBeispiele\n---------\n\nKonvertiert die Datei 'station-007.6d6' ins Send2X-Format:\n\n  $ 6d6read < station-007.6d6 > station-007.s2x\n\nKonvertiert die Datei 'x.6d6' nach 'y.s2x' ohne Fortschrittsanzeige:\n\n  $ 6d6read --no-progress < x.6d6 > y.s2x\n\n",
   .version_ss = "6D6 Compatibility Tools Version %s (%s)\n\n",
 };
-I18n *de_DE = &_de_DE;
-I18n *i18n = &_en_GB;
+const I18n *de_DE = &_de_DE;
+const I18n *i18n = &_en_GB;
 #endif
