@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.3.0] - 2017-07-31
 ### Added
 - `6d6info`, `6d6copy`, `6d6mseed` and `6d6read` now support multiple languages.
 - `6d6mseed` now has an option `--auxfile` to create a CSV file with auxiliary engineering data like temperature and battery voltage.
