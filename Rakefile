@@ -2,11 +2,11 @@ require 'rake/c'
 
 if RUBY_PLATFORM.match(/darwin/)
   C.cflags = '-Wall -Os'
-  host = "osx-64bit"
+  host = "mac"
 else
-  C.cflags = '-Wall -Os -m32 -static'
-  C.ldflags = '-m32 -static'
-  host = "linux-i386"
+  C.cflags = '-Wall -Os -flto'
+  C.ldflags = '-Os -flto'
+  host = "linux"
 end
 
 C.library 'tai', [
@@ -124,7 +124,7 @@ end
 
 desc "Install everything."
 task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed'] do
-  system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
+  #system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
   system 'sudo install -m 4755 "build/6d6info" "/usr/local/bin/"'
   system 'sudo install -m 4755 "build/6d6copy" "/usr/local/bin/"'
   system 'sudo install -m 0755 "build/6d6read" "/usr/local/bin/"'
@@ -140,9 +140,12 @@ task :package => [
   version = v.match(/KUM_6D6_COMPAT_VERSION\s+"([^"]+)"/)[1]
   date = v.match(/KUM_6D6_COMPAT_DATE\s+"([^"]+)"/)[1]
   archive = "6d6-compat-#{date}-#{version}-#{host}"
-  system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
-  system "rm -rf '#{archive}'"
+  system "rm -rf '#{archive}' '#{archive}.tar.gz'"
   system "mkdir '#{archive}'"
   system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/Makefile package/README LICENCE '#{archive}'"
+  system "strip '#{archive}/6d6info'"
+  system "strip '#{archive}/6d6copy'"
+  system "strip '#{archive}/6d6read'"
+  system "strip '#{archive}/6d6mseed'"
   system "tar czf '#{archive}.tar.gz' '#{archive}'"
 end

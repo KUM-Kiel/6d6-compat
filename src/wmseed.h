@@ -166,19 +166,19 @@ static char *wmseed__filename(WMSeed *w, Time t)
 
 static char *wmseed__dirname(WMSeed *w, const char *path)
 {
-  size_t l = 0, x = -1;
+  ssize_t l = 0, x = -1;
   char *s;
   while (path[l]) {
     if (path[l] == '/') x = l;
     ++l;
   }
-  if (x > 1) {
+  if (x > 0) {
     s = wmseed__allocate(w, 0, x + 1);
     memcpy(s, path, x);
     s[x] = 0;
   } else {
     s = wmseed__allocate(w, 0, 2);
-    s[0] = x ? '.' : '/';
+    s[0] = x < 0 ? '.' : '/';
     s[1] = 0;
   }
   return s;

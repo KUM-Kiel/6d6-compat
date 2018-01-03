@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fixed a segfault in `6d6mseed` when output pattern contains no dirname.
 
 ## [1.3.0] - 2017-07-31
 ### Added
