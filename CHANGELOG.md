@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Fixed a segfault in `6d6mseed` when output pattern contains no dirname.
+- Fixed a rare circumstance where sometimes an mseed file would not be split correctly.
 
 ## [1.3.0] - 2017-07-31
 ### Added

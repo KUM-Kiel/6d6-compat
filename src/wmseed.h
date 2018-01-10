@@ -354,7 +354,12 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
   // Check for a cut between the two timestamps.
   // Calculate UTC offset to cut at round UTC dates and times.
   off = 1000000 * tai_utc_diff(t);
-  if (w->cut && wmseed__div(w->last_t - off, w->cut) != wmseed__div(t - off, w->cut)) {
+  // Since the sample `sample_number` is excluded, the split must not fall
+  // on it. By subtracting 1 from each time, the end time `t` is excluded from
+  // the range.
+  // TODO: This probably needs a better fix. Maybe save the split time in the
+  // WMSeed struct.
+  if (w->cut && wmseed__div(w->last_t - 1 - off, w->cut) != wmseed__div(t - 1 - off, w->cut)) {
     split_time = wmseed__div(t - off, w->cut) * w->cut + off;
     split = w->last_sn + (int64_t) ceil((split_time - w->last_t) / a);
     //printf("%lld\n", (long long) split);
