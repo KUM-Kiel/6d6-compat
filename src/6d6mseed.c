@@ -257,6 +257,13 @@ int main(int argc, char **argv)
 
   log_entry(stderr, "============================================================\n");
 
+  if (logfile) {
+    log_entry(stderr, i18n->created_file_s, logfile);
+  }
+  if (aux_path) {
+    log_entry(stderr, i18n->created_file_s, aux_path);
+  }
+
   i = 2;
   /* Skip to start of data.
    * Can not fseek, because stream might not be seekable. */
