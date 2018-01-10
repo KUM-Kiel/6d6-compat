@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Updated leapsecond information according to Bulletin C 55 (2018-01-09).
+
 ### Fixed
 - Fixed a segfault in `6d6mseed` when output pattern contains no dirname.
 
