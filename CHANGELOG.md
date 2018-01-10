@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.3.1] - 2018-01-10
 ### Changed
 - Updated leapsecond information according to Bulletin C 55 (2018-01-09).
 - `6d6mseed` now mentions the creation of a logfile or an auxfile in the log.
