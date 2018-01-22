@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- The skew in `6d6read` had the wrong sign.
 
 ## [1.3.1] - 2018-01-10
 ### Changed

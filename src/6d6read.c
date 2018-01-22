@@ -150,7 +150,8 @@ int main(int argc, char **argv)
     skew_time = bcd2gps(h_end.sync_time);
     //skew = round(h_end.skew / 1000.0);
     /* It seems the manual is wrong and skew is in fact in us. */
-    skew = h_end.skew;
+    /* Also the 6D6 skew and the Send skew have opposite signs. */
+    skew = -h_end.skew;
   }
   /* Create Channels. */
   for (c = 0; c < h_start.channel_count; ++c) {
