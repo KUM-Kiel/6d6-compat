@@ -10,6 +10,7 @@
 #define KUM_6D6_SKEW 2
 
 typedef struct {
+  int version;
   uint8_t start_time[6];
   int sync_type;
   uint8_t sync_time[6];

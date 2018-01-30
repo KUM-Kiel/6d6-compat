@@ -18,6 +18,13 @@ int kum_6d6_header_read(kum_6d6_header *header, const void *x)
   if (!header || !x) return -1;
   /* The last byte must be zero. */
   if (X[511] != 0) return -1;
+  /* Version */
+  if (memcmp(X + o, "6D6\002", 4)) {
+    header->version = 2;
+    ADV_O(4);
+  } else {
+    header->version = 1;
+  }
   /* Time */
   if (memcmp(X + o, "time", 4)) return -1;
   ADV_O(4);

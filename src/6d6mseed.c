@@ -292,7 +292,7 @@ int main(int argc, char **argv)
           case 1: /* Time */
             have_time = 1;
             for (c = 0; c < n_channels; ++c) {
-              t = start_time + (frame[1] * (int64_t) 1000000);
+              t = start_time + (frame[1] * (int64_t) 1000000 + frame[2]);
               if (have_skew) {
                 t += h_start.skew + round((t - sync_time) * skew);
               }
