@@ -15,6 +15,9 @@
 #include "i18n.h"
 #include "i18n_error.h"
 
+#define SAMPLE_TRACKER_IMPLEMENTATION
+#include "sample-tracker.h"
+
 static const char *program = "6d6read";
 static void help(const char *arg)
 {
@@ -83,12 +86,14 @@ int main(int argc, char **argv)
   s2x_header h;
   kum_6d6_header h_start, h_end;
   FILE *input = stdin, *output = stdout;
+  SampleTracker st[1];
   s2x_channel *channels[KUM_6D6_MAX_CHANNEL_COUNT];
   uint8_t block[512], x[16];
   char str[512];
   uint32_t i, j;
   int c, e;
   int64_t start_time, sync_time, skew_time = 0;
+  int64_t t, last_t = -1;
   int32_t skew = 0;
   /* Block parser. */
   int pos, remaining = 0, have_time = 0;
@@ -142,6 +147,9 @@ int main(int argc, char **argv)
     fprintf(stderr, "%s", i18n->malformed_6d6_header);
     exit(1);
   }
+
+  /* Init sample tracker. */
+  sample_tracker_init(st, h_start.sample_rate);
 
   /* Calculate times. */
   start_time = bcd2gps(h_start.start_time);
@@ -205,20 +213,9 @@ int main(int argc, char **argv)
           /* Control Frame */
           switch (frame[0]) {
           case 1: /* Time */
-            if ((start_time + frame[1]) % 60 == 0) {
-              have_time = 1;
-              for (c = 0; c < h_start.channel_count; ++c) {
-                s2x_channel_flush(channels[c]);
-              }
-              st_i32_le(x, S2X_TIME);
-              st_i32_le(x + 4, 4);
-              st_i32_le(x + 8, -1);
-              st_i32_le(x + 12, start_time + frame[1]);
-              if (fwrite(x, 16, 1, output) != 1) {
-                fprintf(stderr, "%s", i18n->io_error);
-                return 1;
-              }
-            }
+            /* Put the time into the sample tracker. */
+            sample_tracker_time(st, (int64_t) frame[1] * 1000000 + frame[2]);
+            if (!have_time) have_time = 1;
             break;
           case 3: /* VBat/Humidity */
             break;
@@ -231,16 +228,6 @@ int main(int argc, char **argv)
           case 11: /* Reboot */
             break;
           case 13: /* End Frame */
-            for (c = 0; c < h_start.channel_count; ++c) {
-              s2x_channel_flush(channels[c]);
-            }
-            st_i32_le(x, S2X_TERMINATE);
-            st_i32_le(x + 4, 0);
-            st_i32_le(x + 8, -1);
-            if (fwrite(x, 12, 1, output) != 1) {
-              fprintf(stderr, "%s", i18n->io_error);
-              return 1;
-            }
             goto done;
           case 15: /* Frame Number */
             break;
@@ -248,6 +235,24 @@ int main(int argc, char **argv)
           }
         } else {
           if (have_time) {
+            t = sample_tracker_sample(st);
+            if (last_t >= 0 && t / 1000000 != last_t / 1000000) {
+              for (c = 0; c < h_start.channel_count; ++c) {
+                s2x_channel_flush(channels[c]);
+              }
+              st_i32_le(x, S2X_TIME);
+              st_i32_le(x + 4, 4);
+              st_i32_le(x + 8, -1);
+              st_i32_le(x + 12, start_time + t / 1000000);
+              if (fwrite(x, 16, 1, output) != 1) {
+                fprintf(stderr, "%s", i18n->io_error);
+                return 1;
+              }
+              have_time = 2;
+            }
+            last_t = t;
+          }
+          if (have_time == 2) {
             for (c = 0; c < h_start.channel_count; ++c) {
               s2x_channel_push(channels[c], frame[c]);
             }
@@ -261,6 +266,16 @@ int main(int argc, char **argv)
     }
   }
 done:
+  for (c = 0; c < h_start.channel_count; ++c) {
+    s2x_channel_flush(channels[c]);
+  }
+  st_i32_le(x, S2X_TERMINATE);
+  st_i32_le(x + 4, 0);
+  st_i32_le(x + 8, -1);
+  if (fwrite(x, 12, 1, output) != 1) {
+    fprintf(stderr, "%s", i18n->io_error);
+    return 1;
+  }
   if (progress) {
     fprintf(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
     fflush(stderr);
