@@ -112,6 +112,9 @@ int main(int argc, char **argv)
   char *aux_path = 0;
   int temperature = 0, humidity = 0, vbat = 0;
 
+  FILE *debug = 0;
+  char *debug_path = 0;
+
   char *station = 0, *location = "", *network = "";
   char *template = 0;
   char *cut_string = 0;
@@ -138,7 +141,8 @@ int main(int argc, char **argv)
     PARAMETER(0, "output", template),
     PARAMETER('c', "cut", cut_string),
     PARAMETER('l', "logfile", logfile),
-    PARAMETER('x', "auxfile", aux_path)
+    PARAMETER('x', "auxfile", aux_path),
+    PARAMETER(0, "debug", debug_path)
   ));
 
   if (cut_string) {
@@ -198,6 +202,17 @@ int main(int argc, char **argv)
     } else {
       fprintf(aux, "Time,Temperature [°C],Humidity [%%],Battery Voltage [V]\n");
       fflush(aux);
+    }
+  }
+
+  /* Create debug file. */
+  if (debug_path) {
+    debug = fopen(debug_path, "wb");
+    if (!debug) {
+      fprintf(stderr, i18n->could_not_open_ss, debug_path, i18n_error(errno));
+    } else {
+      fprintf(debug, "Time,Sample Number\n");
+      fflush(debug);
     }
   }
 
@@ -297,6 +312,9 @@ int main(int argc, char **argv)
                 t += h_start.skew + round((t - sync_time) * skew);
               }
               wmseed_time(channels[c], t, sample_number);
+            }
+            if (debug) {
+              fprintf(debug, "%lld.%06lld,%lld\n", (long long) t / 1000000, (long long) t % 1000000, (long long) sample_number);
             }
             break;
           case 3: /* VBat/Humidity */
