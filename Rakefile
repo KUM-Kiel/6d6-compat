@@ -103,6 +103,12 @@ C.program 's2xshift', [
   '-lm',
 ]
 
+C.program 's2xdump', [
+  's2xdump.c',
+  'libs2x.a',
+  '-lm',
+]
+
 C.program 'tai', [
   'tai.c',
   'libtai.a',
