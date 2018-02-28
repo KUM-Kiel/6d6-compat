@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- `6d6mseed` and `6d6read` can now read files with microsecond timestamps.
+
 ### Fixed
 - The skew in `6d6read` had the wrong sign.
 
