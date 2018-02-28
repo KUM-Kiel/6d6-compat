@@ -6,9 +6,9 @@
 #include "s2x.h"
 #include "number.h"
 
-static void io_error(void)
+static void io_error(int e)
 {
-  fprintf(stderr, "There was an I/O error. This is pretty bad!\n");
+  fprintf(stderr, "There was an I/O error (%d). This is pretty bad!\n", e);
   exit(1);
 }
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   }
 
   while (1) {
-    if (fread(x, 12, 1, in) != 1) io_error();
+    if (fread(x, 12, 1, in) != 1) io_error(1);
     s2x_package_header_read(&ph, x);
 
     if (ph.size && (!inplace || ph.type == S2X_HEADER || ph.type == S2X_TIME)) {
@@ -67,9 +67,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Out of memory!\n");
         return 1;
       }
-      if (fread(buffer, ph.size, 1, in) != 1) io_error();
+      if (fread(buffer, ph.size, 1, in) != 1) io_error(2);
     } else if (ph.size) {
-      if (fseek(in, ph.size, SEEK_CUR)) io_error();
+      if (fseek(in, ph.size, SEEK_CUR)) io_error(3);
     }
 
     if (ph.type == S2X_HEADER) {
@@ -87,17 +87,18 @@ int main(int argc, char **argv)
         fprintf(stderr, "Malformed input file.\n");
         return 1;
       }
+      printf("t,%d\n", (int) ld_u32_le(buffer));
       st_u32_le(buffer, ld_u32_le(buffer) + offset);
     }
 
     if (!inplace) {
-      if (fwrite(x, 12, 1, out) != 1) io_error();
+      if (fwrite(x, 12, 1, out) != 1) io_error(4);
       if (ph.size) {
-        if (fwrite(buffer, ph.size, 1, out) != 1) io_error();
+        if (fwrite(buffer, ph.size, 1, out) != 1) io_error(5);
       }
     } else if (ph.type == S2X_HEADER || ph.type == S2X_TIME) {
-      if (fseek(out, -((long) ph.size), SEEK_CUR) == -1) io_error();
-      if (fwrite(buffer, ph.size, 1, out) != 1) io_error();
+      if (fseek(out, -((long) ph.size), SEEK_CUR) == -1) io_error(6);
+      if (fwrite(buffer, ph.size, 1, out) != 1) io_error(7);
     }
 
     if (buffer) {
