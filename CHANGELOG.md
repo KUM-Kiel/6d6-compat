@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.3.2] - 2018-03-06
 ### Changed
 - `6d6mseed` and `6d6read` can now read files with microsecond timestamps.
 
