@@ -76,6 +76,10 @@ Option '--%s' expects no argument.
 #      https://github.com/KUM-Kiel/6d6-compat/releases     #
 ############################################################
 
+###skew_ignored_warning
+Warning: You have chosen to deactivate the skew correction.
+This is almost certainly a bad idea unless you know exactly what you want
+to achieve.
 ###usage_6d6mseed_s
 6d6mseed
 ========

@@ -77,6 +77,10 @@ Die Option '--%s' benötigt kein Argument.
 #     https://github.com/KUM-Kiel/6d6-compat/releases      #
 ############################################################
 
+###skew_ignored_warning
+Warnung: Die Skew-Korrektur ist ausgeschaltet.
+Dies ist in fast allen Fällen eine schlechte Idee und sollte nur verwendet
+werden, wenn man genau weiß, was man erreichen möchte.
 ###usage_6d6mseed_s
 6d6mseed
 ========

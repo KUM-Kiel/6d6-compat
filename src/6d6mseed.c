@@ -103,6 +103,7 @@ int main(int argc, char **argv)
   Date d;
   double skew = 1;
   int have_skew = 0;
+  int ignore_skew = 0;
   /* Block parser. */
   int pos, remaining = 0, have_time = 0;
   int32_t frame[KUM_6D6_MAX_CHANNEL_COUNT];
@@ -142,7 +143,8 @@ int main(int argc, char **argv)
     PARAMETER('c', "cut", cut_string),
     PARAMETER('l', "logfile", logfile),
     PARAMETER('x', "auxfile", aux_path),
-    PARAMETER(0, "debug", debug_path)
+    PARAMETER(0, "debug", debug_path),
+    FLAG(0, "ignore-skew", ignore_skew, 1)
   ));
 
   if (cut_string) {
@@ -225,6 +227,10 @@ int main(int argc, char **argv)
     fatal(i18n->invalid_station_code);
   }
 
+  if (ignore_skew) {
+    log_entry(stderr, i18n->skew_ignored_warning);
+  }
+
   log_entry(stderr, i18n->processing_s, filename);
   log_entry(stderr, "============================================================\n");
 
@@ -247,7 +253,7 @@ int main(int argc, char **argv)
   start_time = bcd_time(h_start.start_time);
   /* Leap second between sync and start? */
   start_time += 1000000 * (tai_utc_diff(start_time) - tai_utc_diff(sync_time));
-  if (h_end.sync_type == KUM_6D6_SKEW && bcd_valid((const char *) h_end.sync_time)) {
+  if (!ignore_skew && h_end.sync_type == KUM_6D6_SKEW && bcd_valid((const char *) h_end.sync_time)) {
     skew_time = bcd_time(h_end.sync_time);
     h_end.skew += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
     skew = (double) (h_end.skew - h_start.skew) / (skew_time - sync_time);

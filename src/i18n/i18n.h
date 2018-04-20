@@ -34,6 +34,7 @@ typedef struct {
   const char *need_argument_short_c;
   const char *out_of_memory;
   const char *processing_s;
+  const char *skew_ignored_warning;
   const char *unexpected_argument_s;
   const char *unrecognised_long_s;
   const char *unrecognised_short_c;
@@ -98,6 +99,7 @@ static I18n _en_GB = {
   .need_argument_short_c = "Option '-%c' needs an argument.\n",
   .out_of_memory = "Out of memory!\n",
   .processing_s = "Processing '%s'.\n",
+  .skew_ignored_warning = "Warning: You have chosen to deactivate the skew correction.\nThis is almost certainly a bad idea unless you know exactly what you want\nto achieve.\n",
   .unexpected_argument_s = "Option '--%s' expects no argument.\n",
   .unrecognised_long_s = "Unrecognised option '--%s'.\n",
   .unrecognised_short_c = "Unrecognised option '-%c'.\n",
@@ -140,6 +142,7 @@ static I18n _de_DE = {
   .need_argument_short_c = "Die Option '-%c' benötigt ein Argument.\n",
   .out_of_memory = "Arbeitsspeicher ist voll!\n",
   .processing_s = "Verarbeite '%s'.\n",
+  .skew_ignored_warning = "Warnung: Die Skew-Korrektur ist ausgeschaltet.\nDies ist in fast allen Fällen eine schlechte Idee und sollte nur verwendet\nwerden, wenn man genau weiß, was man erreichen möchte.\n",
   .unexpected_argument_s = "Die Option '--%s' benötigt kein Argument.\n",
   .unrecognised_long_s = "Unbekannte Option '--%s'.\n",
   .unrecognised_short_c = "Unbekannte Option '-%c'.\n",
