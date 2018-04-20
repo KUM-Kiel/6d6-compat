@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- `6d6mseed` now supports channel renaming with the `--channels=...` option.
 - `6d6mseed` now has an undocumented and unsupported flag `--ignore-skew` to deactivate the skew correction.
 
 ## [1.3.2] - 2018-03-06

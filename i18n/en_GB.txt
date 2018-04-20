@@ -9,6 +9,12 @@ Could not open '%s': %s.
 Could not open logfile: %s.
 ###invalid_station_code
 Please specify a station code of 1 to 5 alphanumeric characters with --station=CODE.
+###invalid_channel_names
+Channel names must be between 1 and 3 alphanumeric characters.
+###too_many_channel_names
+Too many channel names.
+###need_name_for_every_channel
+When specifying channel names, you must give a name for every channel.
 ###processing_s
 Processing '%s'.
 ###out_of_memory
@@ -23,6 +29,8 @@ Created file '%s'.
 Could not create file '%s': %s.
 ###malformed_6d6_header
 Malformed 6D6 header!
+###using_channel_mapping
+Using Channel Mapping:
 ####label_blank
            :
 ####label_6d6_sn
@@ -108,6 +116,12 @@ Options
 --network=CODE
 
   Set the network code to CODE. This is a two character code assigned by IRIS.
+
+--channels=C1,C2,...
+
+  Rename the channels. When using this option, you have to give a new name for
+  every channel which is between 1 and 3 alphanumeric characters. The names
+  must be seperated by commas without spaces.
 
 --output=FILENAME_TEMPLATE
 

@@ -10,6 +10,12 @@ Konnte Logdatei nicht öffnen: %s.
 ###invalid_station_code
 Bitte geben Sie einen Stationscode von 1 bis 5 alphanumerischen Zeichen mit
 --station=CODE an.
+###invalid_channel_names
+Kanalnamen müssen aus 1 bis 3 alphanumerischen Zeichen bestehen.
+###too_many_channel_names
+Zu viele Kanalnamen angegeben.
+###need_name_for_every_channel
+Es muss für jeden Kanal ein Name angegeben werden.
 ###processing_s
 Verarbeite '%s'.
 ###out_of_memory
@@ -24,6 +30,8 @@ Datei '%s' erstellt.
 Konnte Datei '%s' nicht erstellen: %s.
 ###malformed_6d6_header
 Beschädigter 6D6-Header!
+###using_channel_mapping
+Benutze folgende Kanalzuordnungen:
 ####label_blank
            :
 ####label_6d6_sn
@@ -111,6 +119,13 @@ Optionen
 
   Setzt den Network-Code auf CODE. Dies ist ein zweistelliger Code, der vom
   IRIS vergeben wird.
+
+--channels=C1,C2,...
+
+  Benutzt abweichende Kanalnamen. Die Namen müssen aus 1 bis 3 alphanumerischen
+  Zeichen bestehen und werden durch Kommata ohne Leerzeichen getrennt.
+  Wenn diese Option benutzt wird, muss für jeden Kanal ein Name festgelegt
+  werden.
 
 --output=FILENAME_TEMPLATE
 

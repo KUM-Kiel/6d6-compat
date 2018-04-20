@@ -88,11 +88,33 @@ static int alphanum(const char *s)
   return 1;
 }
 
+static void split_channel_names(char **channel_names)
+{
+  int c = 0, l = 0;
+  char *s = channel_names[0];
+  if (!s) return;
+  while (*s) {
+    if (*s == ',') {
+      if (l < 1 || !s[1]) fatal(i18n->invalid_channel_names);
+      *s = 0;
+      c += 1;
+      l = 0;
+      if (c >= KUM_6D6_MAX_CHANNEL_COUNT) fatal(i18n->too_many_channel_names);
+      channel_names[c] = s + 1;
+    } else {
+      l += 1;
+      if (l > 3) fatal(i18n->invalid_channel_names);
+    }
+    ++s;
+  }
+}
+
 int main(int argc, char **argv)
 {
   kum_6d6_header h_start, h_end;
   FILE *input = 0;
   WMSeed *channels[KUM_6D6_MAX_CHANNEL_COUNT];
+  char *channel_names[KUM_6D6_MAX_CHANNEL_COUNT + 1] = {0};
   int n_channels;
   uint8_t block[512];
   char str[512];
@@ -139,6 +161,7 @@ int main(int argc, char **argv)
     PARAMETER(0, "station", station),
     PARAMETER(0, "location", location),
     PARAMETER(0, "network", network),
+    PARAMETER(0, "channels", channel_names[0]),
     PARAMETER(0, "output", template),
     PARAMETER('c', "cut", cut_string),
     PARAMETER('l', "logfile", logfile),
@@ -146,6 +169,8 @@ int main(int argc, char **argv)
     PARAMETER(0, "debug", debug_path),
     FLAG(0, "ignore-skew", ignore_skew, 1)
   ));
+
+  if (channel_names[0]) split_channel_names(channel_names);
 
   if (cut_string) {
     int n = 0;
@@ -262,13 +287,32 @@ int main(int argc, char **argv)
   /* Create Channels. */
   n_channels = h_start.channel_count;
   assert(0 <= n_channels && n_channels <= KUM_6D6_MAX_CHANNEL_COUNT);
+  /* Check if there are exactly as many names as there are channels. */
+  if (channel_names[0]) {
+    for (c = 0; c < n_channels; ++c) {
+      if (!channel_names[c]) fatal(i18n->need_name_for_every_channel);
+    }
+    if (channel_names[n_channels]) fatal(i18n->need_name_for_every_channel);
+  }
   for (c = 0; c < n_channels; ++c) {
     channels[c] = wmseed_new(
       _logfile,
       template,
-      station, location, (const char *) h_start.channel_names[c], network,
+      station, location,
+      channel_names[c] ? channel_names[c] : (const char *) h_start.channel_names[c],
+      network,
       h_start.sample_rate,
       cut);
+  }
+
+  if (channel_names[0]) {
+    log_entry(stderr, i18n->using_channel_mapping);
+    for (c = 0; c < n_channels; ++c) {
+      log_entry(stderr, "  %s -> %s\n",
+        h_start.channel_names[c],
+        channel_names[c]);
+    }
+    log_entry(stderr, "============================================================\n");
   }
 
   if (_logfile) {
