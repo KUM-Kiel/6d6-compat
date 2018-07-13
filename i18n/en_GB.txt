@@ -157,6 +157,11 @@ Options
   The auxfile contains engineering data like the temperature and battery
   voltage.
 
+--ignore-skew
+
+  Do not use the second synchronisation. This will on average double the timing
+  error and thus will always print a warning and should not be used.
+
 Examples
 --------
 

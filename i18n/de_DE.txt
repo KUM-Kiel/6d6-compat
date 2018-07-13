@@ -163,6 +163,12 @@ Optionen
   Die CSV-Datei enthält die Statusdaten des Datenloggers, wie z.B. Temperatur
   oder Batteriespannung.
 
+--ignore-skew
+
+  Die zweite Synchronisierung wird nicht verwendet. Der Zeitfehler wird
+  hierdurch im Mittel verdoppelt, daher gibt diese Option immer eine Warnung aus
+  und sollte nicht verwendet werden.
+
 Beispiele
 ---------
 
