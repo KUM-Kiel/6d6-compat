@@ -68,6 +68,10 @@ If the device name is `disk2`, the device path will be `/dev/disk2`.
 
 ![Disk Utility](disk-utility.png)
 
+## Frequently Asked Questions
+
+See our [FAQ file](FAQ.md).
+
 ## Licence
 
 The program is published under the terms of the GNU GPL 3.0. See the `LICENCE` file.
