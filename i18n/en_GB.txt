@@ -49,10 +49,14 @@ Using Channel Mapping:
    Duration:
 ####label_sample_rate
 Sample Rate:
+####label_channels
+   Channels:
 ####label_size
        Size:
 ####label_comment
     Comment:
+####gain
+Gain
 ####errno_eacces
 Permission denied
 ####errno_eagain

@@ -50,10 +50,14 @@ Benutze folgende Kanalzuordnungen:
       Dauer:
 ####label_sample_rate
  Abtastrate:
+####label_channels
+     Kanäle:
 ####label_size
  Dateigröße:
 ####label_comment
   Kommentar:
+####gain
+Gain
 ####errno_eacces
 Zugriff verweigert
 ####errno_eagain

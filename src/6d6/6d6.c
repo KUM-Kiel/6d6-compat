@@ -258,6 +258,17 @@ int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end
     i18n->label_duration, buffer);
   fprintf(f, "%s %d SPS\n",
     i18n->label_sample_rate, start_header->sample_rate);
+  // Create padding label.
+  for (i = 0; i < strlen(i18n->label_blank); ++i) {
+    buffer[i] = ' ';
+  }
+  buffer[i] = 0;
+  for (i = 0; i < start_header->channel_count; ++i) {
+    fprintf(f, "%s %s (%s %.1f)\n",
+      i ? buffer : i18n->label_channels,
+      start_header->channel_names[i],
+      i18n->gain, start_header->gain[i] / 10.0);
+  }
   fprintf(f, "%s %.1f MB\n",
     i18n->label_size, end_header->address * 512.0 / 1e6);
 
