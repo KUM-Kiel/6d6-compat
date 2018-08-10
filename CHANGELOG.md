@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.4.2] - 2018-08-10
 ### Changed
 - `6d6info` and the logfile of `6d6mseed` now contain the channel names and gains.
 
