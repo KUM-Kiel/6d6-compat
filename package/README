@@ -2,13 +2,13 @@
 
 Just type
 
-  $ sudo make install
+  $ sudo ./install
 
 This will install the Software to /usr/local/bin.
 
 If you want to install to another directory, you can specify it like so:
 
-  $ sudo make install PREFIX=/path/to/dir
+  $ sudo ./install PREFIX=/path/to/dir
 
 Note that 'bin' will be appended to the path. The default is PREFIX=/usr/local.
 

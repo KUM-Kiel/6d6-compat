@@ -1,0 +1,26 @@
+#!/bin/bash
+
+main() {
+  download "https://raw.githubusercontent.com/KUM-Kiel/6d6-compat/master/install" | bash
+}
+
+find-dl() {
+  if [ $(which curl) ]; then
+    echo "curl -s"
+  elif [ $(which wget) ]; then
+    echo "wget -qO-"
+  fi
+}
+
+dl=$(find-dl)
+if [ "x" = "x${dl}" ]; then
+  echo "No download program is installed."
+  echo "Try \"sudo apt install curl\"."
+  exit 1
+fi
+
+download() {
+  $dl "$1"
+}
+
+main

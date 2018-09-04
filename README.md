@@ -12,13 +12,19 @@ As a planned feature, the implementation of the SEG-Y format is in progress.
 
 ## Installation
 
-The easiest way to install the tools is to [download one of the binary releases](https://github.com/KUM-Kiel/6d6-compat/releases/latest).
-
-After extraction the programs can be installed by typing
+To install, copy this into your terminal and press enter:
 
 ```text
-$ sudo make install
+curl -s https://raw.githubusercontent.com/KUM-Kiel/6d6-compat/master/install | bash
 ```
+
+If that does not work, try this instead:
+
+```text
+wget -qO- https://raw.githubusercontent.com/KUM-Kiel/6d6-compat/master/install | bash
+```
+
+Or [download one of the binary realeases](https://github.com/KUM-Kiel/6d6-compat/releases/latest).
 
 ## Building from source
 

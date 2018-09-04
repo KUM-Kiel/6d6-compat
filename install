@@ -1,5 +1,61 @@
 #!/bin/bash
-install -d $1
-install -m 4755 -o root build/6d6copy $1
-install -m 4755 -o root build/6d6info $1
-install build/6d6read $1
+
+version="1.4.2"
+releasedate="2018-08-10"
+
+main() {
+  archive="6d6-compat-${releasedate}-${version}-$(os)"
+  url="https://github.com/KUM-Kiel/6d6-compat/releases/download/v${version}/${archive}.tar.gz"
+  # Save current directory.
+  current_dir=$(pwd)
+  # Create a temporary directory.
+  dir=$(tempdir)
+  if [ "x" = "x${dir}" ]; then
+    echo "Error: Could not create temporary directory!"
+    exit 1
+  fi
+  cd "${dir}"
+  # Download
+  download "$url" | tar xz
+  cd "${archive}"
+  # Install
+  sudo ./install
+  cd "${current_dir}"
+  rm -rf "${dir}"
+}
+
+os() {
+  if [ "$(uname)" = "Darwin" ]; then
+    echo "mac"
+  else
+    echo "linux"
+  fi
+}
+
+tempdir() {
+  dir=$(mktemp -d 2>/dev/null || mkdtemp -d -t 6d6update)
+  if [ -d "$dir" ]; then
+    echo "$dir"
+  fi
+}
+
+find-dl() {
+  if [ $(which curl) ]; then
+    echo "curl -s"
+  elif [ $(which wget) ]; then
+    echo "wget -qO-"
+  fi
+}
+
+dl=$(find-dl)
+if [ "x" = "x${dl}" ]; then
+  echo "No download program is installed."
+  echo "Try \"sudo apt install curl\"."
+  exit 1
+fi
+
+download() {
+  $dl "$1"
+}
+
+main

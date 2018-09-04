@@ -140,7 +140,7 @@ end
 desc "Create a packaged version."
 task :package => [
   'build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed',
-  'src/version.h', 'package/Makefile', 'package/README', 'LICENCE'
+  'src/version.h', 'package/install', 'package/README', 'package/6d6update', 'LICENCE'
 ] do
   v = File.read 'src/version.h'
   version = v.match(/KUM_6D6_COMPAT_VERSION\s+"([^"]+)"/)[1]
@@ -148,7 +148,7 @@ task :package => [
   archive = "6d6-compat-#{date}-#{version}-#{host}"
   system "rm -rf '#{archive}' '#{archive}.tar.gz'"
   system "mkdir '#{archive}'"
-  system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/Makefile package/README LICENCE '#{archive}'"
+  system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/6d6update package/install package/README LICENCE '#{archive}'"
   system "strip '#{archive}/6d6info'"
   system "strip '#{archive}/6d6copy'"
   system "strip '#{archive}/6d6read'"
