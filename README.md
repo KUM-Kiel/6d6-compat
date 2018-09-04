@@ -15,7 +15,7 @@ As a planned feature, the implementation of the SEG-Y format is in progress.
 To install, copy this into your terminal and press enter:
 
 ```text
-curl -s https://raw.githubusercontent.com/KUM-Kiel/6d6-compat/master/install | bash
+curl -fsSL https://raw.githubusercontent.com/KUM-Kiel/6d6-compat/master/install | bash
 ```
 
 If that does not work, try this instead:

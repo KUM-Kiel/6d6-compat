@@ -17,6 +17,12 @@ main() {
   cd "${dir}"
   # Download
   download "$url" | tar xz
+  if [ $? -ne 0 ]; then
+    echo "Error unpacking the archive!"
+    cd "${current_dir}"
+    rm -rf "${dir}"
+    exit 1
+  fi
   cd "${archive}"
   # Install
   sudo ./install
@@ -41,7 +47,7 @@ tempdir() {
 
 find-dl() {
   if [ $(which curl) ]; then
-    echo "curl -s"
+    echo "curl -fsSL"
   elif [ $(which wget) ]; then
     echo "wget -qO-"
   fi
