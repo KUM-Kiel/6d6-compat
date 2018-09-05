@@ -25,6 +25,7 @@ main() {
   fi
   cd "${archive}"
   # Install
+  echo "Ready to install. Please enter your sudo password!"
   sudo ./install
   cd "${current_dir}"
   rm -rf "${dir}"
