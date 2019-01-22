@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.4.3] - 2019-01-22
 ### Added
 - `6d6copy` can now add text to the comment header while copying.
 
