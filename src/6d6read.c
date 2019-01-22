@@ -132,7 +132,11 @@ int main(int argc, char **argv)
   }
 
   /* Drop root privileges if we had any. */
-  setuid(getuid());
+  uid_t uid = getuid();
+  if (uid > 0 && setuid(uid) < 0) {
+    fprintf(stderr, "%s", i18n->could_not_restore_uid);
+    exit(1);
+  }
 
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {

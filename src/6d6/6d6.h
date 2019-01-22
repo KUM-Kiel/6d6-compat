@@ -34,6 +34,10 @@ typedef struct {
  * Returns 0 on success and -1 on failure. */
 extern int kum_6d6_header_read(kum_6d6_header *header, const void *x);
 
+/* Write a KUM_6D6 header to a 512 byte block.
+ * Returns 0 on success and -1 on failure. */
+extern int kum_6d6_header_write(const kum_6d6_header *header, void *x);
+
 typedef struct {
   void *userdata;
   kum_6d6_header start_header;

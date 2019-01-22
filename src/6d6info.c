@@ -56,8 +56,13 @@ int main(int argc, char **argv)
       exit(1);
     }
   }
+
   /* Drop root privileges if we had any. */
-  setuid(getuid());
+  uid_t uid = getuid();
+  if (uid > 0 && setuid(uid) < 0) {
+    fprintf(stderr, "%s", i18n->could_not_restore_uid);
+    exit(1);
+  }
 
   l = fread(buffer, 1, sizeof(buffer), infile);
   if (l < 1024 || kum_6d6_header_read(start_header, buffer) || kum_6d6_header_read(end_header, buffer + 512)) {

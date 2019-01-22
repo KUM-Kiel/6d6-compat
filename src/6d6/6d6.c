@@ -141,6 +141,97 @@ int kum_6d6_header_read(kum_6d6_header *header, const void *x)
   return 0;
 }
 
+static size_t copy_string(uint8_t *x, const char *s, size_t n)
+{
+  size_t i;
+  if (n == 0) return 0;
+  for (i = 0; i < n; ++i) {
+    x[i] = (uint8_t) s[i];
+    if (s[i] == 0) return i;
+  }
+  x[n - 1] = 0;
+  return n - 1;
+}
+
+static size_t copy_string_0(uint8_t *x, const char *s, size_t n)
+{
+  size_t i;
+  if (n == 0) return 0;
+  for (i = 0; i < n; ++i) {
+    x[i] = (uint8_t) s[i];
+    if (s[i] == 0) return i + 1;
+  }
+  x[n - 1] = 0;
+  return n;
+}
+
+static size_t copy_bytes(uint8_t *x, const void *b, size_t blen, size_t n)
+{
+  size_t i;
+  const uint8_t *y = b;
+  if (blen > n - 1) blen = n - 1;
+  for (i = 0; i < blen; ++i) {
+    x[i] = y[i];
+  }
+  return blen;
+}
+
+int kum_6d6_header_write(const kum_6d6_header *header, void *x)
+{
+  int i;
+  size_t pos = 0, n;
+  uint8_t *buffer = x;
+  if (!header || !x) return -1;
+  pos += copy_string(buffer + pos, "time", 512 - pos);
+  pos += copy_bytes(buffer + pos, header->start_time, 6, 512 - pos);
+  if (header->sync_type == KUM_6D6_SYNC) {
+    memcpy(buffer + pos, "sync", 4);
+    memcpy(buffer + pos + 4, header->sync_time, 6);
+    st_i32_be(buffer + pos + 10, header->skew);
+  } else if (header->sync_type == KUM_6D6_SKEW) {
+    memcpy(buffer + pos, "skew", 4);
+    memcpy(buffer + pos + 4, header->sync_time, 6);
+    st_i32_be(buffer + pos + 10, header->skew);
+  } else {
+    memset(buffer + pos, 0, 14);
+  }
+  pos += 14;
+  pos += copy_string(buffer + pos, "addr", 512 - pos);
+  st_u32_be(buffer + pos, header->address); pos += 4;
+  pos += copy_string(buffer + pos, "rate", 512 - pos);
+  st_u16_be(buffer + pos, header->sample_rate); pos += 2;
+  pos += copy_string(buffer + pos, "writ", 512 - pos);
+  st_u64_be(buffer + pos, header->written_samples); pos += 8;
+  pos += copy_string(buffer + pos, "lost", 512 - pos);
+  st_u32_be(buffer + pos, header->lost_samples); pos += 4;
+  pos += copy_string(buffer + pos, "chan", 512 - pos);
+  st_u8_be(buffer + pos, header->channel_count); pos += 1;
+  pos += copy_string(buffer + pos, "gain", 512 - pos);
+  pos += copy_bytes(buffer + pos, header->gain, header->channel_count, 512 - pos);
+  pos += copy_string(buffer + pos, "bitd", 512 - pos);
+  st_u8_be(buffer + pos, header->bit_depth); pos += 1;
+  pos += copy_string(buffer + pos, "rcid", 512 - pos);
+  pos += copy_string_0(buffer + pos, (char *) header->recorder_id, 512 - pos);
+  pos += copy_string(buffer + pos, "rtci", 512 - pos);
+  pos += copy_string_0(buffer + pos, (char *) header->rtc_id, 512 - pos);
+  pos += copy_string(buffer + pos, "lati", 512 - pos);
+  pos += copy_string_0(buffer + pos, (char *) header->latitude, 512 - pos);
+  pos += copy_string(buffer + pos, "logi", 512 - pos);
+  pos += copy_string_0(buffer + pos, (char *) header->longitude, 512 - pos);
+  pos += copy_string(buffer + pos, "alia", 512 - pos);
+  for (i = 0; i < header->channel_count; ++i) {
+    pos += copy_string_0(buffer + pos, (char *) header->channel_names[i], 512 - pos);
+  }
+  pos += copy_string(buffer + pos, "cmnt", 512 - pos);
+  n = copy_string_0(buffer + pos, (char *) header->comment, 512 - pos);
+  if (n < strlen((char *) header->comment) + 1) return -1;
+  pos += n;
+  if (pos < 512) {
+    memset(buffer + pos, 0, 512 - pos);
+  }
+  return 0;
+}
+
 static int format_duration(long d, char *out, int maxlen)
 {
   int l, n = 0;

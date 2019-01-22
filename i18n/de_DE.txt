@@ -30,6 +30,10 @@ Datei '%s' erstellt.
 Konnte Datei '%s' nicht erstellen: %s.
 ###malformed_6d6_header
 Beschädigter 6D6-Header!
+###comment_too_long
+Der Kommentar passt nicht in den 6D6-Header.
+###could_not_restore_uid
+Beim Wiederherstellen der User-ID ist ein Fehler aufgetreten.
 ###using_channel_mapping
 Benutze folgende Kanalzuordnungen:
 ####label_blank
@@ -242,6 +246,16 @@ Fortschritt wird im Terminal angezeigt. Um die Ausgabe z.B. für automatisierte
 Scripts zu unterdrücken, kann die Option '-q' bzw. '--no-progress' verwendet
 werden.
 
+Optionen
+--------
+
+--append-comment=TEXT
+
+  Hängt den angegebenen Text an den Kommentar-Header an. Wenn der Text
+  Backslashes enthält, wird das nächste Zeichen speziell behandelt.
+  Man kann \n schreiben, um einen Zeilenumbruch zu erzeugen und \\ für einen
+  Backslash.
+
 Beispiele
 ---------
 
@@ -287,4 +301,3 @@ Konvertiert die Datei 'station-007.6d6' ins Send2X-Format:
 Konvertiert die Datei 'x.6d6' nach 'y.s2x' ohne Fortschrittsanzeige:
 
   $ 6d6read --no-progress < x.6d6 > y.s2x
-

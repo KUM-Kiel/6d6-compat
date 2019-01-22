@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- `6d6copy` can now add text to the comment header while copying.
+
 ### Changed
 - Updated leapsecond information according to Bulletin C 57 (2019-01-07).
 

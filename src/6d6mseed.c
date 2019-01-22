@@ -211,7 +211,11 @@ int main(int argc, char **argv)
   }
 
   /* Drop root privileges if we had any. */
-  (void) setuid(getuid());
+  uid_t uid = getuid();
+  if (uid > 0 && setuid(uid) < 0) {
+    fprintf(stderr, "%s", i18n->could_not_restore_uid);
+    exit(1);
+  }
 
   /* Create the logfile. */
   if (logfile) {

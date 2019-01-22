@@ -26,6 +26,39 @@ static void io_error(int x)
   exit(1);
 }
 
+static int append_string(char *s, const char *s2, size_t n)
+{
+  size_t l1 = strlen(s);
+  size_t l2 = strlen(s2);
+  if (l1 + l2 < n) {
+    memcpy(s + l1, s2, l2);
+    memset(s + l1 + l2, 0, n - l1 - l2);
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
+static void unescape(char *s)
+{
+  int r = 0, w = 0;
+  while (s[r]) {
+    if (s[r] == '\\') {
+      r += 1;
+      if (s[r] == 'n') {
+        s[w] = '\n';
+      } else {
+        s[w] = s[r];
+      }
+    } else {
+      s[w] = s[r];
+    }
+    r += 1;
+    w += 1;
+  }
+  s[w] = 0;
+}
+
 int main(int argc, char **argv)
 {
   FILE *infile, *outfile;
@@ -33,6 +66,7 @@ int main(int argc, char **argv)
   char buffer[1024*128];
   kum_6d6_header start_header[1], end_header[1];
   int offset = 0, e, progress = 1;
+  char *append_comment = 0;
 
   i18n_set_lang(getenv("LANG"));
 
@@ -40,6 +74,7 @@ int main(int argc, char **argv)
   parse_options(&argc, &argv, OPTIONS(
     FLAG('p', "progress", progress, 1),
     FLAG('q', "no-progress", progress, 0),
+    PARAMETER(0, "append-comment", append_comment),
     FLAG_CALLBACK('h', "help", help)
   ));
 
@@ -56,7 +91,11 @@ int main(int argc, char **argv)
     }
   }
   /* Drop root privileges if we had any. */
-  setuid(getuid());
+  uid_t uid = getuid();
+  if (uid > 0 && setuid(uid) < 0) {
+    fprintf(stderr, "%s", i18n->could_not_restore_uid);
+    exit(1);
+  }
 
   l = fread(buffer, 1, sizeof(buffer), infile);
   if (l < 1024 || kum_6d6_header_read(start_header, buffer) || kum_6d6_header_read(end_header, buffer + 512)) {
@@ -79,6 +118,15 @@ int main(int argc, char **argv)
   }
 
   end = (int64_t) end_header->address * 512;
+
+  // Update the headers.
+  if (append_comment) {
+    unescape(append_comment);
+    if (append_string((char *) start_header->comment, append_comment, sizeof(start_header->comment)) < 0 || kum_6d6_header_write(start_header, buffer + offset) < 0) {
+      fprintf(stderr, "%s", i18n->comment_too_long);
+      exit(1);
+    }
+  }
 
   m = end < l ? end : l;
 
