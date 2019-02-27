@@ -3,6 +3,10 @@
 
 ###invalid_cut
 Ungültiger Wert für '--cut'.
+###invalid_start_time
+Ungültiger Wert für '--start-time'.
+###invalid_end_time
+Ungültiger Wert für '--end-time'.
 ###could_not_open_ss
 Konnte '%s' nicht öffnen: %s.
 ###could_not_open_logfile_s
@@ -157,6 +161,23 @@ Optionen
 
   Schneidet die Daten in Stücke von SECONDS Sekunden. Der Standardwert ist
   86400, also ein Tag.
+
+--no-cut
+
+  Schaltet das Schneiden der MiniSEED-Dateien ab und erzeugt stattdessen eine
+  große Datei pro Kanal.
+
+--start-time=TIME
+--end-time=TIME
+
+  Begrenzt die konvertierung auf den angegebenen Zeitraum.
+  Wenn diese Optionen benutzt werden, enthalten die erzeugten MiniSEED-Dateien
+  keine Samples vor der angegebenen Startzeit oder nach der angegebenen Endzeit.
+
+  Die Standardwerte sind der Anfang und das Ende der Aufzeichnung.
+
+  Die Zeiten müssen als ISO-String angegeben werden, das heißt im Format
+  'YYYY-MM-DDTHH:MM:SSZ'.
 
 --logfile=FILE
 

@@ -109,6 +109,18 @@ static void split_channel_names(char **channel_names)
   }
 }
 
+static int parse_time(const char *s, Time *t)
+{
+  Date d;
+  if (!(s = tai_parse_date(s, &d))) return -1;
+  while (*s == ' ') {
+    ++s;
+  }
+  if (*s) return -1;
+  if (t) *t = tai_time(d);
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   kum_6d6_header h_start, h_end;
@@ -143,6 +155,12 @@ int main(int argc, char **argv)
   char *cut_string = 0;
   char *logfile = 0;
   int cut = 86400;
+  int no_cut = 0;
+
+  char *start_time_string = 0;
+  char *end_time_string = 0;
+  Time start_time_limit = INT64_MIN;
+  Time end_time_limit = INT64_MAX;
 
   int progress = 1;
 
@@ -164,6 +182,9 @@ int main(int argc, char **argv)
     PARAMETER(0, "channels", channel_names[0]),
     PARAMETER(0, "output", template),
     PARAMETER('c', "cut", cut_string),
+    FLAG(0, "no-cut", no_cut, 1),
+    PARAMETER(0, "start-time", start_time_string),
+    PARAMETER(0, "end-time", end_time_string),
     PARAMETER('l', "logfile", logfile),
     PARAMETER('x', "auxfile", aux_path),
     PARAMETER(0, "debug", debug_path),
@@ -184,11 +205,27 @@ int main(int argc, char **argv)
     cut = n;
   }
 
+  if (no_cut) {
+    cut = 0;
+  }
+
+  if (start_time_string) {
+    if (parse_time(start_time_string, &start_time_limit)) {
+      fatal(i18n->invalid_start_time);
+    }
+  }
+
+  if (end_time_string) {
+    if (parse_time(end_time_string, &end_time_limit)) {
+      fatal(i18n->invalid_end_time);
+    }
+  }
+
   if (!template) {
     if (cut >= 86400) {
       template = "out/%S/%y-%m-%d-%C.mseed";
     } else {
-      template = "out/%S/%y-%m-%d_%h.%i.%s-%C.mseed";
+      template = "out/%S/%y-%m-%dT%h%i%sZ-%C.mseed";
     }
   }
 
@@ -307,6 +344,8 @@ int main(int argc, char **argv)
       network,
       h_start.sample_rate,
       cut);
+    wmseed_start_time(channels[c], start_time_limit);
+    wmseed_end_time(channels[c], end_time_limit);
   }
 
   if (channel_names[0]) {

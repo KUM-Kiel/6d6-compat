@@ -3,6 +3,10 @@
 
 ###invalid_cut
 Invalid value for '--cut'.
+###invalid_start_time
+Invalid value for '--start-time'.
+###invalid_end_time
+Invalid value for '--end-time'.
 ###could_not_open_ss
 Could not open '%s': %s.
 ###could_not_open_logfile_s
@@ -152,6 +156,21 @@ Options
 --cut=SECONDS
 
   Cut the data in files of SECONDS. The default value is 86400, i.e. one day.
+
+--no-cut
+
+  Do not cut the MiniSEED files and produce one big file per channel.
+
+--start-time=TIME
+--end-time=TIME
+
+  Limit the conversion to the time between start and end.
+  If these options are used, the resulting MiniSEED files will not include any
+  samples before the given start time and no samples after the given end time.
+
+  The default values are the beginning and ending of the recording.
+
+  The times must be given as ISO string, i.e. 'YYYY-MM-DDTHH:MM:SSZ'.
 
 --logfile=FILE
 

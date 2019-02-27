@@ -26,6 +26,11 @@ int tai_utc_diff(Time t);
 int tai_leapsecs_valid(Time t);
 int tai_leapsecs_need_update(Time t);
 
+// Parse an ISO date and time string into a date structure.
+// Returns 0 if the string is invalid, otherwise the position after the
+// consumed string is returned.
+const char *tai_parse_date(const char *s, Date *d);
+
 #ifndef NO_STDIO
 int tai_format(char *str, size_t size, Date date);
 #endif
@@ -243,6 +248,93 @@ Time tai_now(void)
     return t;
   }
   return 0;
+}
+
+const char *tai__parse_number(const char *s, int *i)
+{
+  int n = 0;
+  const char *p;
+  p = s;
+  while ('0' <= *p && *p <= '9') {
+    if (__builtin_mul_overflow(n, 10, &n)) return 0;
+    if (__builtin_add_overflow(n, *p - '0', &n)) return 0;
+    ++p;
+  }
+  if (p == s) return 0;
+  if (i) *i = n;
+  return p;
+}
+
+const char *tai__parse_fraction(const char *s, int *i)
+{
+  int n = 0;
+  int digits = 0;
+  const char *p;
+  if (*(s++) != '.') return 0;
+  p = s;
+  while ('0' <= *p && *p <= '9') {
+    if (digits < 6) {
+      if (__builtin_mul_overflow(n, 10, &n)) return 0;
+      if (__builtin_add_overflow(n, *p - '0', &n)) return 0;
+      ++digits;
+    }
+    ++p;
+  }
+  if (p == s) return 0;
+  while (digits < 6) {
+    if (__builtin_mul_overflow(n, 10, &n)) return 0;
+    ++digits;
+  }
+  if (i) *i = n;
+  return p;
+}
+
+const char *tai__match_string(const char *s, const char *str)
+{
+  while (*str) {
+    if (*str != *s) return 0;
+    s++;
+    str++;
+  }
+  return s;
+}
+
+const char *tai_parse_date(const char *s, Date *d)
+{
+  const char *p, *q;
+  if (!(s = tai__parse_number(s, &d->year))) return 0;
+  if (*(s++) != '-') return 0;
+  if (!(s = tai__parse_number(s, &d->month))) return 0;
+  if (d->month < 1 || d->month > 12) return 0;
+  if (*(s++) != '-') return 0;
+  if (!(s = tai__parse_number(s, &d->day))) return 0;
+  // TODO: Check day.
+  p = s;
+  while (*s == ' ') s++;
+  if (*s == 'T') s++;
+  while (*s == ' ') s++;
+  if (p == s) return 0;
+  if (!(s = tai__parse_number(s, &d->hour))) return 0;
+  if (*(s++) != ':') return 0;
+  if (!(s = tai__parse_number(s, &d->min))) return 0;
+  if (*s == ':') {
+    s++;
+    if (!(s = tai__parse_number(s, &d->sec))) return 0;
+    if ((q = tai__parse_fraction(s, &d->usec))) {
+      s = q;
+    } else {
+      d->usec = 0;
+    }
+  } else {
+    d->sec = 0;
+    d->usec = 0;
+  }
+  // TODO: Check time.
+  p = s;
+  while (*s == ' ') s++;
+  if (*s == 'Z') return s + 1;
+  if ((q = tai__match_string(s, "UTC"))) return q;
+  return p;
 }
 
 #ifndef NO_STDIO

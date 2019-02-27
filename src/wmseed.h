@@ -20,13 +20,24 @@ typedef struct {
   FILE *output;
   FILE *logfile;
   Time last_t;
+  Time start_time;
+  Time end_time;
+  int first_file_created;
   int64_t last_sn;
 } WMSeed;
 
+// Create a new MiniSEED writer.
 WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut);
+// Close the MiniSEED writer when done.
 int wmseed_destroy(WMSeed *w);
+// Push a sample to the MiniSEED writer.
 int wmseed_sample(WMSeed *w, int32_t sample);
+// Set the time of the next sample.
 int wmseed_time(WMSeed *w, Time t, int64_t sample_number);
+// Limit the start time.
+int wmseed_start_time(WMSeed *w, Time t);
+// Limit the end time.
+int wmseed_end_time(WMSeed *w, Time t);
 
 #endif
 
@@ -242,7 +253,24 @@ WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, con
   w->output = 0;
   w->last_t = 0;
   w->last_sn = -1;
+  w->start_time = INT64_MIN;
+  w->end_time = INT64_MAX;
+  w->first_file_created = 0;
   return w;
+}
+
+int wmseed_start_time(WMSeed *w, Time t)
+{
+  if (!w) return -1;
+  w->start_time = t;
+  return 0;
+}
+
+int wmseed_end_time(WMSeed *w, Time t)
+{
+  if (!w) return -1;
+  w->end_time = t;
+  return 0;
 }
 
 int wmseed_destroy(WMSeed *w)
@@ -273,7 +301,7 @@ int wmseed_sample(WMSeed *w, int32_t sample)
 static void wmseed__flush(WMSeed *w)
 {
   if (w->data_pending) {
-    if (fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
+    if (!w->output || fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
       wmseed__log(w, stderr, "%s", i18n->io_error);
       exit(1);
     }
@@ -327,17 +355,15 @@ static void wmseed__create_file(WMSeed *w, Time t)
 
 int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
 {
-  int64_t split = -1, off;
+  int64_t off;
   int32_t sample;
   double a;
-  Time tt, split_time = 0;
+  Time tt, split_time = INT64_MAX;
   if (!w) return -1;
   if (w->last_sn == -1) {
     if (sample_number != 0) return -1;
     w->last_t = t;
     w->last_sn = sample_number;
-    // Create the first file.
-    wmseed__create_file(w, t);
     return 0;
   } else if (sample_number <= w->last_sn || t <= w->last_t) {
     return -1;
@@ -361,22 +387,26 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
   // WMSeed struct.
   if (w->cut && wmseed__div(w->last_t - 1 - off, w->cut) != wmseed__div(t - 1 - off, w->cut)) {
     split_time = wmseed__div(t - off, w->cut) * w->cut + off;
-    split = w->last_sn + (int64_t) ceil((split_time - w->last_t) / a);
-    //printf("%lld\n", (long long) split);
-    //fflush(stdout);
   }
 
   while (w->sb->len && w->sb->sample_number <= sample_number) {
-    if (w->sb->sample_number == split) {
-      tt = w->last_t + (int64_t) round((w->sb->sample_number - w->last_sn) * a);
-      wmseed__create_file(w, tt);
-    }
     sample = samplebuffer_pop(w->sb);
-    while (miniseed_record_push_sample(w->record, sample) == -1) {
-      tt = w->last_t + (int64_t) round((w->sb->sample_number - w->last_sn - 1) * a);
-      wmseed__new_record(w, tt);
+    tt = w->last_t + (int64_t) floor((w->sb->sample_number - w->last_sn - 1) * a);
+    if (tt < w->end_time) {
+      if ((!w->first_file_created && tt >= w->start_time) || tt >= split_time) {
+        if (tt >= split_time) {
+          split_time += w->cut;
+        }
+        wmseed__create_file(w, tt);
+        w->first_file_created = 1;
+      }
+      if (w->first_file_created) {
+        while (miniseed_record_push_sample(w->record, sample) == -1) {
+          wmseed__new_record(w, tt);
+        }
+        w->data_pending = 1;
+      }
     }
-    w->data_pending = 1;
   }
 
   // Update state.
