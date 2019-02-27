@@ -301,8 +301,12 @@ int wmseed_sample(WMSeed *w, int32_t sample)
 static void wmseed__flush(WMSeed *w)
 {
   if (w->data_pending) {
-    if (!w->output || fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
-      wmseed__log(w, stderr, "%s", i18n->io_error);
+    if (!w->output) {
+      wmseed__log(w, stderr, i18n->io_error_d, 20);
+      exit(1);
+    }
+    if (fwrite(w->record->data, sizeof(w->record->data), 1, w->output) != 1) {
+      wmseed__log(w, stderr, i18n->io_error_d, 21);
       exit(1);
     }
     w->data_pending = 0;
@@ -397,8 +401,10 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
         if (tt >= split_time) {
           split_time += w->cut;
         }
-        wmseed__create_file(w, tt);
-        w->first_file_created = 1;
+        if (tt >= w->start_time) {
+          wmseed__create_file(w, tt);
+          w->first_file_created = 1;
+        }
       }
       if (w->first_file_created) {
         while (miniseed_record_push_sample(w->record, sample) == -1) {
