@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.5.0] - 2019-02-27
 ### Added
 - `6d6mseed` now has the additional options `--no-cut`, `--start-time` and `--end-time`.
 

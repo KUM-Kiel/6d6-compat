@@ -1,7 +1,7 @@
 #!/bin/bash
 
-version="1.4.3"
-releasedate="2019-01-22"
+version="1.5.0"
+releasedate="2019-02-27"
 
 main() {
   archive="6d6-compat-${releasedate}-${version}-$(os)"
