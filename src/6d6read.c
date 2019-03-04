@@ -14,6 +14,7 @@
 #include "version.h"
 #include "i18n.h"
 #include "i18n_error.h"
+#include "tai.h"
 
 #define SAMPLE_TRACKER_IMPLEMENTATION
 #include "sample-tracker.h"
@@ -81,6 +82,32 @@ static const char *mcs_channels[] = {
   "Seismometer Z"
 };
 
+static Time bcd_time(const uint8_t *bcd)
+{
+  Date date = {
+    .year = bcd_int(bcd[BCD_YEAR]) + 2000,
+    .month = bcd_int(bcd[BCD_MONTH]),
+    .day = bcd_int(bcd[BCD_DAY]),
+    .hour = bcd_int(bcd[BCD_HOUR]),
+    .min = bcd_int(bcd[BCD_MINUTE]),
+    .sec = bcd_int(bcd[BCD_SECOND]),
+    .usec = 0
+  };
+  return tai_time(date);
+}
+
+static int parse_time(const char *s, Time *t)
+{
+  Date d;
+  if (!(s = tai_parse_date(s, &d))) return -1;
+  while (*s == ' ') {
+    ++s;
+  }
+  if (*s) return -1;
+  if (t) *t = tai_time(d);
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   s2x_header h;
@@ -99,6 +126,12 @@ int main(int argc, char **argv)
   int pos, remaining = 0, have_time = 0;
   int32_t frame[KUM_6D6_MAX_CHANNEL_COUNT];
 
+  Time start_time_tai, time_tai;
+  Time start_time_limit = INT64_MIN;
+  Time end_time_limit = INT64_MAX;
+  char *start_time_string = 0;
+  char *end_time_string = 0;
+
   i18n_set_lang(getenv("LANG"));
 
   int progress = 1;
@@ -106,8 +139,24 @@ int main(int argc, char **argv)
   parse_options(&argc, &argv, OPTIONS(
     FLAG('p', "progress", progress, 1),
     FLAG('q', "no-progress", progress, 0),
+    PARAMETER(0, "start-time", start_time_string),
+    PARAMETER(0, "end-time", end_time_string),
     FLAG_CALLBACK('h', "help", help)
   ));
+
+  if (start_time_string) {
+    if (parse_time(start_time_string, &start_time_limit)) {
+      fprintf(stderr, "%s", i18n->invalid_start_time);
+      exit(1);
+    }
+  }
+
+  if (end_time_string) {
+    if (parse_time(end_time_string, &end_time_limit)) {
+      fprintf(stderr, "%s", i18n->invalid_end_time);
+      exit(1);
+    }
+  }
 
   /* Set input/output files. */
   if (isatty(0)) {
@@ -156,6 +205,7 @@ int main(int argc, char **argv)
   sample_tracker_init(st, h_start.sample_rate);
 
   /* Calculate times. */
+  start_time_tai = bcd_time(h_start.start_time);
   start_time = bcd2gps(h_start.start_time);
   sync_time = bcd2gps(h_start.sync_time);
   if (h_end.sync_type == KUM_6D6_SKEW) {
@@ -240,21 +290,24 @@ int main(int argc, char **argv)
         } else {
           if (have_time) {
             t = sample_tracker_sample(st);
-            if (last_t >= 0 && t / 1000000 != last_t / 1000000) {
-              for (c = 0; c < h_start.channel_count; ++c) {
-                s2x_channel_flush(channels[c]);
+            time_tai = start_time_tai + t;
+            if (start_time_limit <= time_tai && time_tai < end_time_limit) {
+              if (last_t >= 0 && t / 1000000 != last_t / 1000000) {
+                for (c = 0; c < h_start.channel_count; ++c) {
+                  s2x_channel_flush(channels[c]);
+                }
+                st_i32_le(x, S2X_TIME);
+                st_i32_le(x + 4, 4);
+                st_i32_le(x + 8, -1);
+                st_i32_le(x + 12, start_time + t / 1000000);
+                if (fwrite(x, 16, 1, output) != 1) {
+                  fprintf(stderr, "%s", i18n->io_error);
+                  return 1;
+                }
+                have_time = 2;
               }
-              st_i32_le(x, S2X_TIME);
-              st_i32_le(x + 4, 4);
-              st_i32_le(x + 8, -1);
-              st_i32_le(x + 12, start_time + t / 1000000);
-              if (fwrite(x, 16, 1, output) != 1) {
-                fprintf(stderr, "%s", i18n->io_error);
-                return 1;
-              }
-              have_time = 2;
+              last_t = t;
             }
-            last_t = t;
           }
           if (have_time == 2) {
             for (c = 0; c < h_start.channel_count; ++c) {

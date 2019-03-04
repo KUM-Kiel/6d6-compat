@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- `6d6read` now also supports `--start-time` and `--end-time`.
 
 ## [1.5.0] - 2019-02-27
 ### Added
