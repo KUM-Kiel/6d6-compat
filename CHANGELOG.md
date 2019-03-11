@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `6d6read` now also supports `--start-time` and `--end-time`.
 
+### Fixed
+- Fixed an issue that prevented `6d6mseed` from emitting the last block of data when using the `--end-time` option.
+
 ## [1.5.0] - 2019-02-27
 ### Added
 - `6d6mseed` now has the additional options `--no-cut`, `--start-time` and `--end-time`.

@@ -273,24 +273,6 @@ int wmseed_end_time(WMSeed *w, Time t)
   return 0;
 }
 
-int wmseed_destroy(WMSeed *w)
-{
-  if (!w) return -1;
-  // Write remaining data.
-  // TODO
-  // Close files.
-  if (w->output) fclose(w->output);
-  // Free everything.
-  free(w->template);
-  free(w->station);
-  free(w->location);
-  free(w->channel);
-  free(w->network);
-  samplebuffer_destroy(w->sb);
-  free(w);
-  return 0;
-}
-
 int wmseed_sample(WMSeed *w, int32_t sample)
 {
   if (!w || w->last_sn < 0) return -1;
@@ -311,6 +293,25 @@ static void wmseed__flush(WMSeed *w)
     }
     w->data_pending = 0;
   }
+}
+
+int wmseed_destroy(WMSeed *w)
+{
+  if (!w) return -1;
+  // Write remaining data.
+  // TODO: Flush the data from the sample buffer.
+  wmseed__flush(w);
+  // Close files.
+  if (w->output) fclose(w->output);
+  // Free everything.
+  free(w->template);
+  free(w->station);
+  free(w->location);
+  free(w->channel);
+  free(w->network);
+  samplebuffer_destroy(w->sb);
+  free(w);
+  return 0;
 }
 
 static void wmseed__new_record(WMSeed *w, Time t)
