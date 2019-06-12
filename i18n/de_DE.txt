@@ -225,9 +225,16 @@ Informationen über eine .6d6-Datei auf der Festplatte anzeigen.
 Verwendung
 ----------
 
-  %s /dev/sdX1
+  %s [Optionen] /dev/sdX1
 
 Der Parameter ist die Datei oder das Gerät, das untersucht werden soll.
+
+Optionen
+--------
+
+--json
+
+  Gibt JSON statt formatiertem Text aus.
 
 Beispiele
 ---------
@@ -253,7 +260,7 @@ beliebige Datenanalysen und Konvertierungen.
 Verwendung
 ----------
 
-  %s [-q|--no-progress] /dev/sdX1 out.6d6
+  %s [Optionen] /dev/sdX1 out.6d6
 
 Der erste Parameter ist die Quelldatei. Dies ist normalerweise der Gerätepfad
 des StiKs oder der SD-Karte und sieht ähnlich aus wie '/dev/sdb1' oder
@@ -276,6 +283,17 @@ Optionen
   Backslashes enthält, wird das nächste Zeichen speziell behandelt.
   Man kann \n schreiben, um einen Zeilenumbruch zu erzeugen und \\ für einen
   Backslash.
+
+-q
+--no-progress
+
+  Unterdrückt die Fortschrittsanzeige.
+
+--json-progress
+
+  Die Fortschrittsanzeige erfolt in Form von JSON-Nachrichten. Jede Nachricht
+  wird durch einen Zeilenumbruch abgeschlossen. Die Ausgabe erfolgt nach STDOUT
+  statt nach STDERR.
 
 Beispiele
 ---------

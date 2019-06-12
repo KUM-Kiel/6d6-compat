@@ -214,9 +214,16 @@ about a .6d6 file on your hard drive.
 Usage
 -----
 
-  %s /dev/sdX1
+  %s [options] /dev/sdX1
 
 The parameter is the file or device you want to inspect.
+
+Options
+-------
+
+--json
+
+  Output JSON instead of formatted text.
 
 Examples
 --------
@@ -241,7 +248,7 @@ starting point for arbitrary data analysis methods.
 Usage
 -----
 
-  %s [-q|--no-progress] /dev/sdX1 out.6d6
+  %s [options] /dev/sdX1 out.6d6
 
 The first argument is the source of the data. This is normally your
 StiK or SD card device like '/dev/sdb1' or '/dev/mmcblk0p1'.
@@ -261,6 +268,16 @@ Options
   Append the given text to the comment header. If the text contains a backslash
   it escapes the next character. You can write \n to insert a newline and \\ to
   insert a literal backslash.
+
+-q
+--no-progress
+
+  Suppresses the progress display.
+
+--json-progress
+
+  Output progress in form of JSON messages. Each message is on one line.
+  This makes the progress output got to STDOUT instead of STDERR.
 
 Examples
 --------
