@@ -31,6 +31,7 @@ int main(int argc, char **argv)
   char buffer[512*3];
   kum_6d6_header start_header[1], end_header[1];
   int e;
+  int json = 0;
 
   i18n_set_lang(getenv("LANG"));
 
@@ -41,7 +42,8 @@ int main(int argc, char **argv)
 
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
-    FLAG_CALLBACK('h', "help", help)
+    FLAG_CALLBACK('h', "help", help),
+    FLAG(0, "json", json, 1)
   ));
 
   if (argc != 2) help(0);
@@ -77,7 +79,11 @@ int main(int argc, char **argv)
   }
 
   /* Show all the info. */
-  kum_6d6_show_info(stdout, start_header, end_header);
+  if (json) {
+    kum_6d6_show_info_json(stdout, start_header, end_header);
+  } else {
+    kum_6d6_show_info(stdout, start_header, end_header);
+  }
 
   return 0;
 }

@@ -372,3 +372,90 @@ int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end
 
   return 0;
 }
+
+static int print_json_string(FILE *f, const uint8_t *s)
+{
+  int c;
+  fputc('"', f);
+  // TODO: Replace invalid UTF-8.
+  while ((c = *(s++) & 255)) {
+    if (c == '"') {
+      fprintf(f, "\\\"");
+    } else if (c == '\\') {
+      fprintf(f, "\\\\");
+    } else if (c == '\b') {
+      fprintf(f, "\\b");
+    } else if (c == '\f') {
+      fprintf(f, "\\f");
+    } else if (c == '\n') {
+      fprintf(f, "\\n");
+    } else if (c == '\r') {
+      fprintf(f, "\\r");
+    } else if (c == '\t') {
+      fprintf(f, "\\t");
+    } else if (c < 32) {
+      fprintf(f, "\\u%04x", c);
+    } else {
+      fputc(c, f);
+    }
+  }
+  fputc('"', f);
+  return 0;
+}
+
+int kum_6d6_show_info_json(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end_header)
+{
+  Time start_time, end_time, sync_time, skew_time = 0;
+  Date d;
+  int i;
+
+  if (start_header->sync_type != KUM_6D6_SYNC) return -1;
+  /* Calculate times. */
+  sync_time = bcd_time(start_header->sync_time);
+  start_time = bcd_time(start_header->start_time);
+  end_time = bcd_time(end_header->start_time);
+  /* Leap second between sync and start end? */
+  start_time += 1000000 * (tai_utc_diff(start_time) - tai_utc_diff(sync_time));
+  end_time += 1000000 * (tai_utc_diff(end_time) - tai_utc_diff(sync_time));
+  if (end_header->sync_type == KUM_6D6_SKEW) {
+    skew_time = bcd_time(end_header->sync_time);
+    end_header->skew += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
+    skew_time += 1000000 * (tai_utc_diff(skew_time) - tai_utc_diff(sync_time));
+  }
+
+  /* Show all the info. */
+  fprintf(f, "{");
+  fprintf(f, "\"recorder_id\":");
+  print_json_string(f, start_header->recorder_id);
+  d = tai_date(start_time, 0, 0);
+  fprintf(f, ",\"start_time\":\"%d-%02d-%02dT%02d:%02d:%02dZ\"",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  d = tai_date(end_time, 0, 0);
+  fprintf(f, ",\"end_time\":\"%d-%02d-%02dT%02d:%02d:%02dZ\"",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  d = tai_date(sync_time, 0, 0);
+  fprintf(f, ",\"sync_time\":\"%d-%02d-%02dT%02d:%02d:%02dZ\"",
+    d.year, d.month, d.day, d.hour, d.min, d.sec);
+  if (end_header->sync_type == KUM_6D6_SKEW) {
+    d = tai_date(skew_time, 0, 0);
+    fprintf(f, ",\"skew_time\":\"%d-%02d-%02dT%02d:%02d:%02dZ\"",
+      d.year, d.month, d.day, d.hour, d.min, d.sec);
+    fprintf(f, ",\"skew\":%" PRId64,
+      end_header->skew);
+  }
+  fprintf(f, ",\"sample_rate\":%d", start_header->sample_rate);
+  fprintf(f, ",\"size\":%lld", (long long) end_header->address * 512);
+  fprintf(f, ",\"channels\":[");
+  for (i = 0; i < start_header->channel_count; ++i) {
+    fprintf(f, "%s{\"name\":", i ? "," : "");
+    print_json_string(f, start_header->channel_names[i]);
+    fprintf(f, ",\"gain\":%.1f}", start_header->gain[i] / 10.0);
+  }
+  fprintf(f, "]");
+
+  fprintf(f, ",\"comment\":");
+  print_json_string(f, start_header->comment);
+  fprintf(f, "}\n");
+
+  return 0;
+}
