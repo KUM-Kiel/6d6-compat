@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.5.2] - 2019-06-12
 ### Added
 - Added JSON output to `6d6info` via the `--json` flag.
 - Added JSON progress output to `6d6copy` via the `--json-progress` flag.
