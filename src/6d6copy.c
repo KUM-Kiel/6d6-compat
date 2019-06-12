@@ -4,11 +4,13 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include "6d6.h"
 #include "options.h"
 #include "version.h"
 #include "i18n.h"
 #include "i18n_error.h"
+#include "monotonic-time.h"
 
 const char *program = "6d6copy";
 static void help(const char *arg)
@@ -67,6 +69,7 @@ int main(int argc, char **argv)
   kum_6d6_header start_header[1], end_header[1];
   int offset = 0, e, progress = 1;
   char *append_comment = 0;
+  int64_t t0, t1, t, _50ms;
 
   i18n_set_lang(getenv("LANG"));
 
@@ -74,6 +77,7 @@ int main(int argc, char **argv)
   parse_options(&argc, &argv, OPTIONS(
     FLAG('p', "progress", progress, 1),
     FLAG('q', "no-progress", progress, 0),
+    FLAG(0, "json-progress", progress, 2),
     PARAMETER(0, "append-comment", append_comment),
     FLAG_CALLBACK('h', "help", help)
   ));
@@ -135,6 +139,12 @@ int main(int argc, char **argv)
 
   n = l;
 
+  _50ms = monotonic_time_ms(50);
+  t0 = t1 = monotonic_time();
+  if (progress == 2) {
+    fprintf(stdout, "{\"done\":0,\"total\":%"PRId64",\"elapsed\":0}\n", end);
+    fflush(stdout);
+  }
   while (n < end) {
     m = (end - n) > sizeof(buffer) ? sizeof(buffer) : end - n;
     l = fread(buffer, 1, m, infile);
@@ -142,10 +152,31 @@ int main(int argc, char **argv)
     l = fwrite(buffer, 1, m, outfile);
     if (m != l) io_error(3);
     n += m;
-    if (progress) fprintf(stderr, "%2$3d%% %1$6.1f MB        \r", (double) n / 1000000, (int) (100 * n / end));
+    if (progress == 1) {
+      fprintf(stderr, "%2$3d%% %1$6.1f MB        \r",
+        (double) n / 1000000,
+        (int) (100 * n / end));
+    } else if (progress == 2) {
+      t = monotonic_time();
+      if (t - t1 >= _50ms) {
+        fprintf(stdout,
+          "{\"done\":%"PRId64",\"total\":%"PRId64",\"elapsed\":%"PRId64"}\n",
+          n, end, (t - t0) * 50 / _50ms);
+        fflush(stdout);
+        t1 = t;
+      }
+    }
   }
 
-  if (progress) fprintf(stderr, "%2$3d%% %1$6.1f MB        \n", (double) end / 1000000, 100);
+  if (progress == 1) {
+    fprintf(stderr, "%2$3d%% %1$6.1f MB        \n", (double) end / 1000000, 100);
+  } else if (progress == 2) {
+    t = monotonic_time();
+    fprintf(stdout,
+          "{\"done\":%"PRId64",\"total\":%"PRId64",\"elapsed\":%"PRId64"}\n",
+          end, end, (t - t0) * 50 / _50ms);
+    fflush(stdout);
+  }
 
   return 0;
 }
