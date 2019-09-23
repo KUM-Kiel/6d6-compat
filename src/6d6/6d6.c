@@ -1,10 +1,10 @@
+#define _FILE_OFFSET_BITS 64
 #include "6d6.h"
 
 #include <string.h>
 #include <inttypes.h>
 #include "number.h"
 #include "bcd.h"
-#include "tai.h"
 #include "i18n.h"
 
 #define X ((const uint8_t *) x)
@@ -458,4 +458,65 @@ int kum_6d6_show_info_json(FILE *f, kum_6d6_header *start_header, kum_6d6_header
   fprintf(f, "}\n");
 
   return 0;
+}
+
+int64_t kum_6d6_find(FILE *f, int64_t offset, Time t, kum_6d6_header *start_header, kum_6d6_header *end_header)
+{
+  int64_t min = (int64_t) 512 * start_header->address + offset;
+  int64_t max = (int64_t) 512 * end_header->address + offset;
+  Time time_base = bcd_time(start_header->start_time);
+  Time min_time = time_base;
+  Time max_time = bcd_time(end_header->start_time);
+  int64_t pos;
+  Time pos_time;
+  uint32_t frame[4];
+  uint8_t buf[4];
+  int found;
+  // If t is before the start time, return the start of the data.
+  if (t < time_base) return min;
+  // Seek to one minute before the requested time.
+  t -= 60000000;
+  while (1) {
+    if (t < min_time) return min;
+    if (t > max_time) {
+      pos = max - 1024 * 1024;
+    } else {
+      pos = min + (max - min) * (double) (t - min_time) / (max_time - min_time);
+    }
+    while (pos % 4) pos -= 1;
+    pos -= 1024 * 1024;
+    if (pos < min) return min;
+    // Seek to the suspected position.
+    if (fseek(f, pos, SEEK_SET) < 0) return min;
+    // Search for a timestamp.
+    frame[0] = -1;
+    frame[1] = -1;
+    frame[2] = -1;
+    frame[3] = -1;
+    found = 0;
+    while (!found && pos < max) {
+      if (fread(buf, 4, 1, f) != 1) return min;
+      pos += 4;
+      frame[0] = frame[1];
+      frame[1] = frame[2];
+      frame[2] = frame[3];
+      frame[3] = (((uint32_t) buf[0] * 256 + buf[1]) * 256 + buf[2]) * 256 + buf[3];
+      if (frame[0] == 1 && frame[3] == 0 && frame[2] < 1000000) {
+        pos_time = time_base + (int64_t) 1000000 * frame[1] + frame[2];
+        pos -= 16;
+        found = 1;
+      }
+    }
+    if (!found) return min;
+    if (pos_time <= t) {
+      if (pos_time - 60000000 >= t) return pos;
+      min = pos;
+      min_time = pos_time;
+    } else {
+      max = pos;
+      max_time = pos_time;
+      if (t > max_time) return max;
+    }
+  }
+  return min;
 }

@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- `6d6mseed` now seeks to the start of the data when using `--start-time`.
 
 ## [1.5.3] - 2019-07-05
 ### Changed

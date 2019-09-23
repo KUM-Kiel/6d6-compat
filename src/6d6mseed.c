@@ -162,6 +162,11 @@ int main(int argc, char **argv)
   Time start_time_limit = INT64_MIN;
   Time end_time_limit = INT64_MAX;
 
+  // Seek support.
+  int offset = 0;
+  int j_start;
+  int64_t seek_position;
+
   int progress = 1;
 
   i18n_set_lang(getenv("LANG"));
@@ -302,6 +307,7 @@ int main(int argc, char **argv)
 
   read_block(block, input);
   if (kum_6d6_header_read(&h_start, block) == -1) {
+    offset = 512;
     read_block(block, input);
     if (kum_6d6_header_read(&h_start, block) == -1) {
       log_entry(stderr, "%s", i18n->malformed_6d6_header);
@@ -373,18 +379,35 @@ int main(int argc, char **argv)
   }
 
   i = 2;
-  /* Skip to start of data.
-   * Can not fseek, because stream might not be seekable. */
-  while (i < h_start.address) {
-    read_block(block, input);
-    ++i;
+  if (start_time_limit > INT64_MIN) {
+    seek_position = kum_6d6_find(input, offset, start_time_limit, &h_start, &h_end);
+    j_start = seek_position % 4;
+    seek_position -= j_start;
+    if (fseek(input, seek_position, SEEK_SET) < 0) {
+      /* Seek failed. */
+      j_start = 0;
+      while (i < h_start.address) {
+        read_block(block, input);
+        ++i;
+      }
+    } else {
+      i = (seek_position - offset) / 512;
+    }
+  } else {
+    /* Skip to start of data.
+    * Can not fseek, because stream might not be seekable. */
+    while (i < h_start.address) {
+      read_block(block, input);
+      ++i;
+    }
+    j_start = 0;
   }
   /* Read data. */
   while (i < h_end.address) {
     read_block(block, input);
     ++i;
     /* Process block. */
-    for (j = 0; j < 512; j += 4) {
+    for (j = j_start; j < 512; j += 4) {
       if (!remaining) {
         frame[0] = ld_i32_be(block + j);
         remaining = (frame[0] & 1) ? 3 : (n_channels - 1);
@@ -399,16 +422,18 @@ int main(int argc, char **argv)
           switch (frame[0]) {
           case 1: /* Time */
             have_time = 1;
+            e = 0;
             for (c = 0; c < n_channels; ++c) {
               t = start_time + (frame[1] * (int64_t) 1000000 + frame[2]);
               if (have_skew) {
                 t += h_start.skew + round((t - sync_time) * skew);
               }
-              wmseed_time(channels[c], t, sample_number);
+              if (wmseed_time(channels[c], t, sample_number) == 1) e = 1;
             }
             if (debug) {
               fprintf(debug, "%lld.%06lld,%lld\n", (long long) t / 1000000, (long long) t % 1000000, (long long) sample_number);
             }
+            if (e == 1) goto done;
             break;
           case 3: /* VBat/Humidity */
             vbat = frame[1] >> 16;
@@ -447,6 +472,7 @@ int main(int argc, char **argv)
         }
       }
     }
+    j_start = 0;
     if (progress && i % 1024 == 0) {
       fprintf(stderr, "%3d%% %6.1fMB     \r", (int) (i * 100 / h_end.address), (double) i * 512 / 1000000l);
       fflush(stderr);

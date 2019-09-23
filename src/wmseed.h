@@ -364,6 +364,7 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
   int32_t sample;
   double a;
   Time tt, split_time = INT64_MAX;
+  int done = 0;
   if (!w) return -1;
   if (w->last_sn == -1) {
     if (sample_number != 0) return -1;
@@ -413,6 +414,9 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
         }
         w->data_pending = 1;
       }
+    } else {
+      // The time limit has been reached.
+      done = 1;
     }
   }
 
@@ -420,7 +424,7 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
   w->last_t = t;
   w->last_sn = sample_number;
 
-  return 0;
+  return done;
 }
 
 #endif

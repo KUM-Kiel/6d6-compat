@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "tai.h"
 
 #define KUM_6D6_MAX_CHANNEL_COUNT 8
 
@@ -71,3 +72,6 @@ extern int kum_6d6_show_info(FILE *f, kum_6d6_header *start_header, kum_6d6_head
 /* Print info about a 6D6 file to the given stream in JSON format.
  * Returns -1 on error. */
 extern int kum_6d6_show_info_json(FILE *f, kum_6d6_header *start_header, kum_6d6_header *end_header);
+
+/* Find the position of a time frame before the given time t. */
+extern int64_t kum_6d6_find(FILE *f, int64_t offset, Time t, kum_6d6_header *start_header, kum_6d6_header *end_header);
