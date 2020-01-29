@@ -1,11 +1,14 @@
 require 'rake/c'
 
-if RUBY_PLATFORM.match(/darwin/)
+machine = `#{C.cc} -dumpmachine`.strip
+strip = ENV['STRIP'] || 'strip'
+
+if machine.match(/darwin/)
   C.cflags = '-Wall -Os'
   host = "mac"
 else
-  C.cflags = '-Wall -Os -flto'
-  C.ldflags = '-Os -flto'
+  C.cflags = '-Wall -Os'
+  C.ldflags = '-Os'
   host = "linux"
 end
 
@@ -149,9 +152,9 @@ task :package => [
   system "rm -rf '#{archive}' '#{archive}.tar.gz'"
   system "mkdir '#{archive}'"
   system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/6d6update package/install package/README LICENCE '#{archive}'"
-  system "strip '#{archive}/6d6info'"
-  system "strip '#{archive}/6d6copy'"
-  system "strip '#{archive}/6d6read'"
-  system "strip '#{archive}/6d6mseed'"
+  system "#{strip} '#{archive}/6d6info'"
+  system "#{strip} '#{archive}/6d6copy'"
+  system "#{strip} '#{archive}/6d6read'"
+  system "#{strip} '#{archive}/6d6mseed'"
   system "tar czf '#{archive}.tar.gz' '#{archive}'"
 end
