@@ -99,10 +99,10 @@ int sample_tracker_time(SampleTracker *st, int64_t t)
     st->error_integral += st->error;
     st->steer = (64 * st->error + st->error_integral) >> 16;
     // Limit steering.
-    if (st->steer > st->base_time / 100)
+    /*if (st->steer > st->base_time / 100)
       st->steer = st->base_time / 100;
     if (st->steer < -st->base_time / 100)
-      st->steer = -st->base_time / 100;
+      st->steer = -st->base_time / 100;*/
     st->sample_time = st->base_time + st->steer;
   }
   return 0;
