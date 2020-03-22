@@ -61,6 +61,15 @@ static void read_block(uint8_t *block, FILE *f)
   }
 }
 
+static int try_read_block(uint8_t *block, FILE *f)
+{
+  if (fread(block, 512, 1, f) != 1) {
+    log_entry(stderr, i18n->io_error);
+    return 1;
+  }
+  return 0;
+}
+
 static Time bcd_time(const uint8_t *bcd)
 {
   Date date = {
@@ -164,6 +173,9 @@ int main(int argc, char **argv)
 
   int progress = 1;
 
+  // Flag if the data should be resampled.
+  int resample = 0;
+
   i18n_set_lang(getenv("LANG"));
 
   int outdated = tai_leapsecs_need_update(tai_now());
@@ -188,7 +200,8 @@ int main(int argc, char **argv)
     PARAMETER('l', "logfile", logfile),
     PARAMETER('x', "auxfile", aux_path),
     PARAMETER(0, "debug", debug_path),
-    FLAG(0, "ignore-skew", ignore_skew, 1)
+    FLAG(0, "ignore-skew", ignore_skew, 1),
+    FLAG(0, "resample", resample, 1)
   ));
 
   if (channel_names[0]) split_channel_names(channel_names);
@@ -343,7 +356,8 @@ int main(int argc, char **argv)
       channel_names[c] ? channel_names[c] : (const char *) h_start.channel_names[c],
       network,
       h_start.sample_rate,
-      cut);
+      cut,
+      resample);
     wmseed_start_time(channels[c], start_time_limit);
     wmseed_end_time(channels[c], end_time_limit);
   }
@@ -381,7 +395,9 @@ int main(int argc, char **argv)
   }
   /* Read data. */
   while (i < h_end.address) {
-    read_block(block, input);
+    if (try_read_block(block, input)) {
+      goto done;
+    }
     ++i;
     /* Process block. */
     for (j = 0; j < 512; j += 4) {
@@ -404,7 +420,7 @@ int main(int argc, char **argv)
               if (have_skew) {
                 t += h_start.skew + round((t - sync_time) * skew);
               }
-              wmseed_time(channels[c], t, sample_number);
+              wmseed_time(channels[c], t);
             }
             if (debug) {
               fprintf(debug, "%lld.%06lld,%lld\n", (long long) t / 1000000, (long long) t % 1000000, (long long) sample_number);

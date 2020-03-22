@@ -9,6 +9,7 @@
 
 typedef struct {
   int64_t cut;
+  int64_t sample_number;
   char *template;
   char *station, *location, *channel, *network;
   double sample_rate;
@@ -27,13 +28,13 @@ typedef struct {
 } WMSeed;
 
 // Create a new MiniSEED writer.
-WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut);
+WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling);
 // Close the MiniSEED writer when done.
 int wmseed_destroy(WMSeed *w);
 // Push a sample to the MiniSEED writer.
 int wmseed_sample(WMSeed *w, int32_t sample);
 // Set the time of the next sample.
-int wmseed_time(WMSeed *w, Time t, int64_t sample_number);
+int wmseed_time(WMSeed *w, Time t);
 // Limit the start time.
 int wmseed_start_time(WMSeed *w, Time t);
 // Limit the end time.
@@ -234,12 +235,13 @@ static int wmseed__mkdir_p(WMSeed *w, const char *path)
   return 0;
 }
 
-WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut)
+WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling)
 {
   WMSeed *w;
   w = wmseed__allocate(0, 0, sizeof(*w));
   w->logfile = logfile;
   w->cut = cut * 1000000;
+  w->sample_number = 0;
   w->template = wmseed__strdup(w, template);
   w->station = wmseed__strdup(w, station);
   w->location = wmseed__strdup(w, location);
@@ -277,6 +279,7 @@ int wmseed_sample(WMSeed *w, int32_t sample)
 {
   if (!w || w->last_sn < 0) return -1;
   samplebuffer_push(w->sb, sample);
+  w->sample_number += 1;
   return 0;
 }
 
@@ -358,7 +361,7 @@ static void wmseed__create_file(WMSeed *w, Time t)
 // b must be positive.
 #define wmseed__div(a, b) ((a) / (b) - ((a) % (b) < 0))
 
-int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
+int wmseed_time(WMSeed *w, Time t)
 {
   int64_t off;
   int32_t sample;
@@ -366,26 +369,26 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
   Time tt, split_time = INT64_MAX;
   if (!w) return -1;
   if (w->last_sn == -1) {
-    if (sample_number != 0) return -1;
+    if (w->sample_number != 0) return -1;
     w->last_t = t;
-    w->last_sn = sample_number;
+    w->last_sn = w->sample_number;
     return 0;
-  } else if (sample_number <= w->last_sn || t <= w->last_t) {
+  } else if (w->sample_number <= w->last_sn || t <= w->last_t) {
     return -1;
   }
 
-  if (sample_number - w->last_sn < 1008 * 20) {
+  if (w->sample_number - w->last_sn < 1008 * 20) {
     // Don't use too many timestamps.
     return 0;
   }
 
   // Use linear interpolation.
-  a = (double) (t - w->last_t) / (sample_number - w->last_sn);
+  a = (double) (t - w->last_t) / (w->sample_number - w->last_sn);
 
   // Check for a cut between the two timestamps.
   // Calculate UTC offset to cut at round UTC dates and times.
   off = 1000000 * tai_utc_diff(t);
-  // Since the sample `sample_number` is excluded, the split must not fall
+  // Since the sample `w->sample_number` is excluded, the split must not fall
   // on it. By subtracting 1 from each time, the end time `t` is excluded from
   // the range.
   // TODO: This probably needs a better fix. Maybe save the split time in the
@@ -394,7 +397,7 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
     split_time = wmseed__div(t - off, w->cut) * w->cut + off;
   }
 
-  while (w->sb->len && w->sb->sample_number <= sample_number) {
+  while (w->sb->len && w->sb->sample_number <= w->sample_number) {
     sample = samplebuffer_pop(w->sb);
     tt = w->last_t + (int64_t) floor((w->sb->sample_number - w->last_sn - 1) * a);
     if (tt < w->end_time) {
@@ -418,7 +421,7 @@ int wmseed_time(WMSeed *w, Time t, int64_t sample_number)
 
   // Update state.
   w->last_t = t;
-  w->last_sn = sample_number;
+  w->last_sn = w->sample_number;
 
   return 0;
 }
