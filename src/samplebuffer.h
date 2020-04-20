@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 typedef struct {
-  // Number of the next smaple to be extracted from the buffer.
+  // Number of the next sample to be extracted from the buffer.
   int64_t sample_number;
   int pos, len, size;
   int32_t *data;

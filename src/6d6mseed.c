@@ -21,6 +21,8 @@
 #include "samplebuffer.h"
 #define WMSEED_IMPLEMENTATION
 #include "wmseed.h"
+#define RESAMPLER_IMPLEMENTATION
+#include "resampler.h"
 
 static FILE *_logfile = 0;
 static void log_entry(FILE *f, const char *format, ...)

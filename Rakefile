@@ -97,6 +97,7 @@ C.program '6d6mseed', [
   'libbcd.a',
   'libtai.a',
   'libi18n.a',
+  'libsamplerate.a',
   '-lm',
 ]
 

@@ -6,6 +6,7 @@
 #include "miniseed.h"
 #include "tai.h"
 #include "samplebuffer.h"
+#include "resampler.h"
 
 typedef struct {
   int64_t cut;
@@ -25,6 +26,7 @@ typedef struct {
   Time end_time;
   int first_file_created;
   int64_t last_sn;
+  struct Resampler *resampler;
 } WMSeed;
 
 // Create a new MiniSEED writer.
@@ -235,32 +237,6 @@ static int wmseed__mkdir_p(WMSeed *w, const char *path)
   return 0;
 }
 
-WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling)
-{
-  WMSeed *w;
-  w = wmseed__allocate(0, 0, sizeof(*w));
-  w->logfile = logfile;
-  w->cut = cut * 1000000;
-  w->sample_number = 0;
-  w->template = wmseed__strdup(w, template);
-  w->station = wmseed__strdup(w, station);
-  w->location = wmseed__strdup(w, location);
-  w->channel = wmseed__strdup(w, channel);
-  w->network = wmseed__strdup(w, network);
-  w->sample_rate = sample_rate;
-  w->sb = samplebuffer_new();
-  w->record_number = 0;
-  w->record_time = 0;
-  w->data_pending = 0;
-  w->output = 0;
-  w->last_t = 0;
-  w->last_sn = -1;
-  w->start_time = INT64_MIN;
-  w->end_time = INT64_MAX;
-  w->first_file_created = 0;
-  return w;
-}
-
 int wmseed_start_time(WMSeed *w, Time t)
 {
   if (!w) return -1;
@@ -275,7 +251,7 @@ int wmseed_end_time(WMSeed *w, Time t)
   return 0;
 }
 
-int wmseed_sample(WMSeed *w, int32_t sample)
+static int wmseed__sample(WMSeed *w, int32_t sample)
 {
   if (!w || w->last_sn < 0) return -1;
   samplebuffer_push(w->sb, sample);
@@ -361,7 +337,7 @@ static void wmseed__create_file(WMSeed *w, Time t)
 // b must be positive.
 #define wmseed__div(a, b) ((a) / (b) - ((a) % (b) < 0))
 
-int wmseed_time(WMSeed *w, Time t)
+static int wmseed__time(WMSeed *w, Time t)
 {
   int64_t off;
   int32_t sample;
@@ -377,10 +353,10 @@ int wmseed_time(WMSeed *w, Time t)
     return -1;
   }
 
-  if (w->sample_number - w->last_sn < 1008 * 20) {
+  /*if (w->sample_number - w->last_sn < 1008 * 20) {
     // Don't use too many timestamps.
     return 0;
-  }
+  }*/
 
   // Use linear interpolation.
   a = (double) (t - w->last_t) / (w->sample_number - w->last_sn);
@@ -424,6 +400,71 @@ int wmseed_time(WMSeed *w, Time t)
   w->last_sn = w->sample_number;
 
   return 0;
+}
+
+static void wmseed__resampler_callback(void *userdata, float *samples, int number_of_samples, int64_t start_time)
+{
+  WMSeed *w = userdata;
+  wmseed__time(w, start_time);
+  int i;
+  for (i = 0; i < number_of_samples; ++i) {
+    wmseed__sample(w, samples[i]);
+  }
+}
+
+int wmseed_sample(WMSeed *w, int32_t sample)
+{
+  if (w->resampler) {
+    resampler_sample(w->resampler, sample);
+    return 0;
+  } else {
+    return wmseed__sample(w, sample);
+  }
+}
+
+int wmseed_time(WMSeed *w, Time t)
+{
+  if (w->resampler) {
+    resampler_time(w->resampler, t);
+    return 0;
+  } else {
+    return wmseed__time(w, t);
+  }
+}
+
+WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling)
+{
+  WMSeed *w;
+  w = wmseed__allocate(0, 0, sizeof(*w));
+  w->logfile = logfile;
+  w->cut = cut * 1000000;
+  w->sample_number = 0;
+  w->template = wmseed__strdup(w, template);
+  w->station = wmseed__strdup(w, station);
+  w->location = wmseed__strdup(w, location);
+  w->channel = wmseed__strdup(w, channel);
+  w->network = wmseed__strdup(w, network);
+  w->sample_rate = sample_rate;
+  w->sb = samplebuffer_new();
+  w->record_number = 0;
+  w->record_time = 0;
+  w->data_pending = 0;
+  w->output = 0;
+  w->last_t = 0;
+  w->last_sn = -1;
+  w->start_time = INT64_MIN;
+  w->end_time = INT64_MAX;
+  w->first_file_created = 0;
+  if (resampling) {
+    w->resampler = resampler_new(sample_rate, wmseed__resampler_callback, w);
+    if (!w->resampler) {
+      wmseed__log(w, stderr, "%s", i18n->out_of_memory);
+      exit(1);
+    }
+  } else {
+    w->resampler = 0;
+  }
+  return w;
 }
 
 #endif
