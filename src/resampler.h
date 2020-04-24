@@ -167,13 +167,13 @@ start:
   if (resampler->callback) {
     resampler->callback(resampler->userdata, resampler->out, data.output_frames_gen, resampler->output_time);
   }
-  int unused_frames = 8192 - data.input_frames_used;
+  int unused_frames = resampler->samples_in - data.input_frames_used;
   memmove(resampler->in, resampler->in + data.input_frames_used, sizeof(*resampler->in * unused_frames));
   resampler->samples_in = unused_frames;
   resampler->input_time += 1e6 * data.input_frames_used / (resampler->target_sample_rate / resampler->conversion_rate);
   resampler->output_time += 1e6 * data.output_frames_gen / resampler->target_sample_rate;
   // If there are still samples left or there was not enough space in the output, do another conversion.
-  if ((resampler->samples_in > 0 && data.output_frames_gen > 0) || data.output_frames_gen == 8192) goto start;
+  if (resampler->samples_in > 0 || data.output_frames_gen == 8192) goto start;
   // Call the callback only with the end time.
   if (resampler->callback) {
     resampler->callback(resampler->userdata, 0, 0, resampler->output_time);
