@@ -277,6 +277,9 @@ static void wmseed__flush(WMSeed *w)
 int wmseed_destroy(WMSeed *w)
 {
   if (!w) return -1;
+  if (w->resampler) {
+    resampler_done(w->resampler);
+  }
   // Write remaining data.
   // TODO: Flush the data from the sample buffer.
   wmseed__flush(w);
