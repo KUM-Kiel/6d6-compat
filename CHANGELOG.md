@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- Added a `--resample` flag to `6d6mseed` which will resample the data to the nominal samplerate.
 
 ## [1.5.4] - 2020-01-29
 ### Changed

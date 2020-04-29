@@ -153,6 +153,7 @@ task :package => [
   system "rm -rf '#{archive}' '#{archive}.tar.gz'"
   system "mkdir '#{archive}'"
   system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/6d6update package/install package/README LICENCE '#{archive}'"
+  system "cp src/samplerate/COPYING '#{archive}/LICENCE-SRC'"
   system "#{strip} '#{archive}/6d6info'"
   system "#{strip} '#{archive}/6d6copy'"
   system "#{strip} '#{archive}/6d6read'"

@@ -110,6 +110,7 @@ void resampler_sample(struct Resampler *resampler, float sample)
       .src_ratio = resampler->conversion_rate,
     };
     // If the buffer is full, call into src and fill the output buffer.
+    src_set_ratio(resampler->src_state, resampler->conversion_rate);
     int e = src_process(resampler->src_state, &data);
     if (e) {
       fprintf(stderr, "Resampler error: %s\n", src_strerror(e));

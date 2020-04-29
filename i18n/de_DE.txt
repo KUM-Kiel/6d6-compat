@@ -198,6 +198,11 @@ Optionen
   hierdurch im Mittel verdoppelt, daher gibt diese Option immer eine Warnung aus
   und sollte nicht verwendet werden.
 
+--resample
+
+  Die Skew-Korrektur wird durchgeführt, indem die Daten auf die nominelle Samplerate
+  resampled werden.
+
 Beispiele
 ---------
 

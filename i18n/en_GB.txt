@@ -189,6 +189,10 @@ Options
   Do not use the second synchronisation. This will on average double the timing
   error and thus will always print a warning and should not be used.
 
+--resample
+
+  Do skew correction by resampling the data to the nominal sampling frequency.
+
 Examples
 --------
 
