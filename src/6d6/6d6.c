@@ -236,6 +236,9 @@ static int format_duration(long d, char *out, int maxlen)
 {
   int l, n = 0;
   long t;
+  if (d <= 0) {
+    return snprintf(out, maxlen, "0s");
+  }
   t = d / 86400;
   if (t) {
     l = snprintf(out, maxlen, "%ldd", t);
