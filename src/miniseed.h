@@ -143,7 +143,7 @@ int miniseed_record_push_sample(MiniSeedRecord *r, int32_t sample)
   int num_samples, i;
   if (!r) return -1;
   num_samples = r->data[30] * 256 + r->data[31];
-  if (num_samples >= 1008) return -1;
+  if (num_samples >= 1000) return -1;
   i = 64 + num_samples * 4;
   r->data[i] = sample >> 24;
   r->data[i + 1] = sample >> 16;
