@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.6.1] - 2020-07-20
 ### Changed
 - Updated leapsecond information according to Bulletin C 60 (2020-07-07).
 
