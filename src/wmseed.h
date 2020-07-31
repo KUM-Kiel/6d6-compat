@@ -10,6 +10,7 @@
 
 typedef struct {
   int64_t cut;
+  int64_t cut_section;
   int64_t sample_number;
   char *template;
   char *station, *location, *channel, *network;
@@ -342,10 +343,10 @@ static void wmseed__create_file(WMSeed *w, Time t)
 
 static int wmseed__time(WMSeed *w, Time t)
 {
-  int64_t off;
   int32_t sample;
   double a;
-  Time tt, split_time = INT64_MAX;
+  Time tt;
+  int64_t cut_section = 0;
   if (!w) return -1;
   if (w->last_sn == -1) {
     if (w->sample_number != 0) return -1;
@@ -364,29 +365,21 @@ static int wmseed__time(WMSeed *w, Time t)
   // Use linear interpolation.
   a = (double) (t - w->last_t) / (w->sample_number - w->last_sn);
 
-  // Check for a cut between the two timestamps.
-  // Calculate UTC offset to cut at round UTC dates and times.
-  off = 1000000 * tai_utc_diff(t);
-  // Since the sample `w->sample_number` is excluded, the split must not fall
-  // on it. By subtracting 1 from each time, the end time `t` is excluded from
-  // the range.
-  // TODO: This probably needs a better fix. Maybe save the split time in the
-  // WMSeed struct.
-  if (w->cut && wmseed__div(w->last_t - 1 - off, w->cut) != wmseed__div(t - 1 - off, w->cut)) {
-    split_time = wmseed__div(t - off, w->cut) * w->cut + off;
-  }
-
   while (w->sb->len && w->sb->sample_number <= w->sample_number) {
     sample = samplebuffer_pop(w->sb);
     tt = w->last_t + (int64_t) floor((w->sb->sample_number - w->last_sn - 1) * a);
+    // Calculate cut section.
+    if (w->cut) {
+      cut_section = wmseed__div(tt - 1000000 * tai_utc_diff(tt), w->cut);
+    }
+    // Ignore samples after the end time.
     if (tt < w->end_time) {
-      if ((!w->first_file_created && tt >= w->start_time) || tt >= split_time) {
-        if (tt >= split_time) {
-          split_time += w->cut;
-        }
+      // Create a new file if the start time has been reached or the cut section has changed.
+      if ((!w->first_file_created && tt >= w->start_time) || (w->first_file_created && w->cut_section != cut_section)) {
         if (tt >= w->start_time) {
           wmseed__create_file(w, tt);
           w->first_file_created = 1;
+          w->cut_section = cut_section;
         }
       }
       if (w->first_file_created) {
