@@ -75,7 +75,7 @@ int main()
 
 struct Resampler *resampler_new(double target_sample_rate, ResamplerCallback cb, void *userdata)
 {
-  struct Resampler *resampler = malloc(sizeof(*resampler));
+  struct Resampler *resampler = (struct Resampler *) malloc(sizeof(*resampler));
   if (!resampler) return 0;
   resampler->callback = cb;
   resampler->userdata = userdata;

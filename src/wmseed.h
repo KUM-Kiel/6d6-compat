@@ -12,7 +12,7 @@ typedef struct {
   int64_t cut;
   int64_t cut_section;
   int64_t sample_number;
-  char *template;
+  char *file_name_template;
   char *station, *location, *channel, *network;
   double sample_rate;
   Samplebuffer *sb;
@@ -31,7 +31,7 @@ typedef struct {
 } WMSeed;
 
 // Create a new MiniSEED writer.
-WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling);
+WMSeed *wmseed_new(FILE *logfile, const char *file_name_template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling);
 // Close the MiniSEED writer when done.
 int wmseed_destroy(WMSeed *w);
 // Push a sample to the MiniSEED writer.
@@ -96,7 +96,7 @@ static char *wmseed__strdup(WMSeed *w, const char *s)
 {
   char *s2;
   if (s) {
-    s2 = wmseed__allocate(w, 0, strlen(s) + 1);
+    s2 = (char *) wmseed__allocate(w, 0, strlen(s) + 1);
     strcpy(s2, s);
     return s2;
   } else {
@@ -114,7 +114,7 @@ static char *wmseed__strappend(WMSeed *w, char *s, const char *format, ...)
   va_start(args, format);
   l2 = vsnprintf(0, 0, format, args);
   va_end(args);
-  s = wmseed__allocate(w, s, l1 + l2 + 1);
+  s = (char *) wmseed__allocate(w, s, l1 + l2 + 1);
   va_start(args, format);
   vsnprintf(s + l1, l2 + 1, format, args);
   va_end(args);
@@ -126,7 +126,7 @@ static char *wmseed__filename(WMSeed *w, Time t)
   int yday;
   Date d = tai_date(t, &yday, 0);
   char *s = 0;
-  char *tmpl = w->template;
+  char *tmpl = w->file_name_template;
   while (*tmpl) {
     if (*tmpl == '%') {
       ++tmpl;
@@ -188,11 +188,11 @@ static char *wmseed__dirname(WMSeed *w, const char *path)
     ++l;
   }
   if (x > 0) {
-    s = wmseed__allocate(w, 0, x + 1);
+    s = (char *) wmseed__allocate(w, 0, x + 1);
     memcpy(s, path, x);
     s[x] = 0;
   } else {
-    s = wmseed__allocate(w, 0, 2);
+    s = (char *) wmseed__allocate(w, 0, 2);
     s[0] = x < 0 ? '.' : '/';
     s[1] = 0;
   }
@@ -287,7 +287,7 @@ int wmseed_destroy(WMSeed *w)
   // Close files.
   if (w->output) fclose(w->output);
   // Free everything.
-  free(w->template);
+  free(w->file_name_template);
   free(w->station);
   free(w->location);
   free(w->channel);
@@ -400,7 +400,7 @@ static int wmseed__time(WMSeed *w, Time t)
 
 static void wmseed__resampler_callback(void *userdata, float *samples, int number_of_samples, int64_t start_time)
 {
-  WMSeed *w = userdata;
+  WMSeed *w = (WMSeed *) userdata;
   wmseed__time(w, start_time);
   int i;
   for (i = 0; i < number_of_samples; ++i) {
@@ -428,14 +428,14 @@ int wmseed_time(WMSeed *w, Time t)
   }
 }
 
-WMSeed *wmseed_new(FILE *logfile, const char *template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling)
+WMSeed *wmseed_new(FILE *logfile, const char *file_name_template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling)
 {
   WMSeed *w;
-  w = wmseed__allocate(0, 0, sizeof(*w));
+  w = (WMSeed *) wmseed__allocate(0, 0, sizeof(*w));
   w->logfile = logfile;
   w->cut = cut * 1000000;
   w->sample_number = 0;
-  w->template = wmseed__strdup(w, template);
+  w->file_name_template = wmseed__strdup(w, file_name_template);
   w->station = wmseed__strdup(w, station);
   w->location = wmseed__strdup(w, location);
   w->channel = wmseed__strdup(w, channel);

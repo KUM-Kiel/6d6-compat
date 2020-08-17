@@ -37,13 +37,13 @@ void samplebuffer_destroy(Samplebuffer *sb);
 Samplebuffer *samplebuffer_new()
 {
   Samplebuffer *sb;
-  sb = malloc(sizeof(*sb));
+  sb = (Samplebuffer *) malloc(sizeof(*sb));
   if (!sb) goto fail;
   sb->sample_number = 0;
   sb->pos = 0;
   sb->len = 0;
   sb->size = 4096;
-  sb->data = malloc(sizeof(sb->data[0]) * 4096);
+  sb->data = (int32_t *) malloc(sizeof(sb->data[0]) * 4096);
   if (!sb->data) goto fail;
   return sb;
 fail:
@@ -59,7 +59,7 @@ void samplebuffer_push(Samplebuffer *sb, int32_t sample)
   if (!sb) return;
   // Grow buffer if necessary.
   if (sb->len == sb->size) {
-    buf = malloc(sizeof(*buf) * sb->size * 2);
+    buf = (int32_t *) malloc(sizeof(*buf) * sb->size * 2);
     if (!buf) {
       fprintf(stderr, "Out of memory!\n");
       exit(1);
