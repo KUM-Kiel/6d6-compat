@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Changed the way file splits are calculated. This should stop sometimes missing a split.
+- Using fewer timestamps to improve glitch resistance.
 
 ## [1.6.1] - 2020-07-20
 ### Changed

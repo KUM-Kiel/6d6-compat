@@ -357,10 +357,10 @@ static int wmseed__time(WMSeed *w, Time t)
     return -1;
   }
 
-  /*if (w->sample_number - w->last_sn < 1008 * 20) {
+  if (w->sample_number - w->last_sn < 1008 * 20) {
     // Don't use too many timestamps.
     return 0;
-  }*/
+  }
 
   // Use linear interpolation.
   a = (double) (t - w->last_t) / (w->sample_number - w->last_sn);
