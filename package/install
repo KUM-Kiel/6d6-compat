@@ -22,6 +22,7 @@ main() {
   install -m 4755 "${archive}/6d6info" "${bin}"
   install -m 4755 "${archive}/6d6copy" "${bin}"
   install -m 4755 "${archive}/6d6mseed" "${bin}"
+  install -m 4755 "${archive}/6d6strip" "${bin}"
   install -m 0755 "${archive}/6d6read" "${bin}"
   install -m 0755 "${archive}/6d6update" "${bin}"
 }

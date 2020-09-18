@@ -101,6 +101,16 @@ C.program '6d6mseed', [
   '-lm',
 ]
 
+C.program '6d6strip', [
+  '6d6strip.c',
+  'lib6d6.a',
+  'liboptions.a',
+  'libbcd.a',
+  'libtai.a',
+  'libi18n.a',
+  '-lm',
+]
+
 C.program 's2xshift', [
   's2xshift.c',
   'libs2x.a',
@@ -139,11 +149,12 @@ task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6m
   system 'sudo install -m 4755 "build/6d6copy" "/usr/local/bin/"'
   system 'sudo install -m 0755 "build/6d6read" "/usr/local/bin/"'
   system 'sudo install -m 4755 "build/6d6mseed" "/usr/local/bin/"'
+  system 'sudo install -m 4755 "build/6d6strip" "/usr/local/bin/"'
 end
 
 desc "Create a packaged version."
 task :package => [
-  'build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed',
+  'build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed', 'build/6d6strip',
   'src/version.h', 'package/install', 'package/README', 'package/6d6update', 'LICENCE'
 ] do
   v = File.read 'src/version.h'
@@ -152,11 +163,12 @@ task :package => [
   archive = "6d6-compat-#{date}-#{version}-#{host}"
   system "rm -rf '#{archive}' '#{archive}.tar.gz'"
   system "mkdir '#{archive}'"
-  system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed package/6d6update package/install package/README LICENCE '#{archive}'"
+  system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed build/6d6strip package/6d6update package/install package/README LICENCE '#{archive}'"
   system "cp src/samplerate/COPYING '#{archive}/LICENCE-SRC'"
   system "#{strip} '#{archive}/6d6info'"
   system "#{strip} '#{archive}/6d6copy'"
   system "#{strip} '#{archive}/6d6read'"
   system "#{strip} '#{archive}/6d6mseed'"
+  system "#{strip} '#{archive}/6d6strip'"
   system "tar czf '#{archive}.tar.gz' '#{archive}'"
 end
