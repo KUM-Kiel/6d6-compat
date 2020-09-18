@@ -140,6 +140,8 @@ int main(int argc, char **argv)
     exit(1);
   }
 
+  n_channels = h_start.channel_count;
+
   output = fopen(argv[2], "wbx");
   if (!output) {
     fprintf(stderr, i18n->could_not_create_file_ss, argv[2], i18n_error(errno));
