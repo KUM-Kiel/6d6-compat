@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.6.3] - 2021-01-19
 ### Added
 - New tool `6d6strip`.
 
