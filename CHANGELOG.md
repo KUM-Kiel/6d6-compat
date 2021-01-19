@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- New tool `6d6strip`.
+
 ### Changed
 - Updated leapsecond information according to Bulletin C 61 (2021-01-07).
 
