@@ -7,6 +7,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <inttypes.h>
 #include "6d6.h"
 #include "bcd.h"
 #include "number.h"
@@ -15,6 +16,7 @@
 #include "tai.h"
 #include "i18n.h"
 #include "i18n_error.h"
+#include "monotonic-time.h"
 #define MINISEED_IMPLEMENTATION
 #include "miniseed.h"
 #define SAMPLEBUFFER_IMPLEMENTATION
@@ -175,6 +177,8 @@ int main(int argc, char **argv)
 
   int progress = 1;
 
+  int64_t t0, t1, t2, _50ms, total;
+
   // Flag if the data should be resampled.
   int resample = 0;
 
@@ -189,6 +193,7 @@ int main(int argc, char **argv)
   parse_options(&argc, &argv, OPTIONS(
     FLAG('p', "progress", progress, 1),
     FLAG('q', "no-progress", progress, 0),
+    FLAG(0, "json-progress", progress, 2),
     FLAG_CALLBACK('h', "help", help),
     PARAMETER(0, "station", station),
     PARAMETER(0, "location", location),
@@ -388,6 +393,14 @@ int main(int argc, char **argv)
     log_entry(stderr, i18n->created_file_s, aux_path);
   }
 
+  _50ms = monotonic_time_ms(50);
+  t0 = t1 = monotonic_time();
+  total = h_end.address * 512;
+  if (progress == 2) {
+    fprintf(stdout, "{\"done\":0,\"total\":%"PRId64",\"elapsed\":0}\n", total);
+    fflush(stdout);
+  }
+
   i = 2;
   /* Skip to start of data.
    * Can not fseek, because stream might not be seekable. */
@@ -465,18 +478,33 @@ int main(int argc, char **argv)
         }
       }
     }
-    if (progress && i % 1024 == 0) {
+    if (progress == 1 && i % 1024 == 0) {
       fprintf(stderr, "%3d%% %6.1fMB     \r", (int) (i * 100 / h_end.address), (double) i * 512 / 1000000l);
       fflush(stderr);
+    } else if (progress == 2) {
+      t2 = monotonic_time();
+      if (t2 - t1 >= _50ms) {
+        fprintf(stdout,
+          "{\"done\":%"PRId64",\"total\":%"PRId64",\"elapsed\":%"PRId64"}\n",
+          (int64_t) i * 512, total, (t2 - t0) * 50 / _50ms);
+        fflush(stdout);
+        t1 = t2;
+      }
     }
   }
 done:
   for (c = 0; c < n_channels; ++c) {
     wmseed_destroy(channels[c]);
   }
-  if (progress) {
+  if (progress == 1) {
     log_entry(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
     fflush(stderr);
+  } else if (progress == 2) {
+    t2 = monotonic_time();
+    fprintf(stdout,
+          "{\"done\":%"PRId64",\"total\":%"PRId64",\"elapsed\":%"PRId64"}\n",
+          total, total, (t2 - t0) * 50 / _50ms);
+    fflush(stdout);
   }
 
   return 0;

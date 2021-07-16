@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <inttypes.h>
 #include "6d6.h"
 #include "bcd.h"
 #include "number.h"
@@ -14,6 +15,7 @@
 #include "version.h"
 #include "i18n.h"
 #include "i18n_error.h"
+#include "monotonic-time.h"
 #include "tai.h"
 
 #define SAMPLE_TRACKER_IMPLEMENTATION
@@ -135,10 +137,14 @@ int main(int argc, char **argv)
   i18n_set_lang(getenv("LANG"));
 
   int progress = 1;
+
+  int64_t t0, t1, t2, _50ms, total;
+
   program = argv[0];
   parse_options(&argc, &argv, OPTIONS(
     FLAG('p', "progress", progress, 1),
     FLAG('q', "no-progress", progress, 0),
+    FLAG(0, "json-progress", progress, 2),
     PARAMETER(0, "start-time", start_time_string),
     PARAMETER(0, "end-time", end_time_string),
     FLAG_CALLBACK('h', "help", help)
@@ -241,6 +247,15 @@ int main(int argc, char **argv)
     copy_string_space(h.station_comm, "", sizeof(h.station_comm));
     channels[c] = s2x_channel_new(&h, output);
   }
+
+  _50ms = monotonic_time_ms(50);
+  t0 = t1 = monotonic_time();
+  total = h_end.address * 512;
+  if (progress == 2) {
+    fprintf(stderr, "{\"done\":0,\"total\":%"PRId64",\"elapsed\":0}\n", total);
+    fflush(stderr);
+  }
+
   i = 2;
   /* Skip to start of data.
    * Can not fseek, because stream might not be seekable. */
@@ -317,9 +332,18 @@ int main(int argc, char **argv)
         }
       }
     }
-    if (progress && i % 1024 == 0) {
+    if (progress == 1 && i % 1024 == 0) {
       fprintf(stderr, "%3d%% %6.1fMB     \r", (int) (i * 100 / h_end.address), (double) i * 512 / 1000000l);
       fflush(stderr);
+    } else if (progress == 2) {
+      t2 = monotonic_time();
+      if (t2 - t1 >= _50ms) {
+        fprintf(stderr,
+          "{\"done\":%"PRId64",\"total\":%"PRId64",\"elapsed\":%"PRId64"}\n",
+          (int64_t) i * 512, total, (t2 - t0) * 50 / _50ms);
+        fflush(stderr);
+        t1 = t2;
+      }
     }
   }
 done:
@@ -333,8 +357,14 @@ done:
     fprintf(stderr, "%s", i18n->io_error);
     return 1;
   }
-  if (progress) {
+  if (progress == 1) {
     fprintf(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
+    fflush(stderr);
+  } else if (progress == 2) {
+    t2 = monotonic_time();
+    fprintf(stderr,
+          "{\"done\":%"PRId64",\"total\":%"PRId64",\"elapsed\":%"PRId64"}\n",
+          total, total, (t2 - t0) * 50 / _50ms);
     fflush(stderr);
   }
 
