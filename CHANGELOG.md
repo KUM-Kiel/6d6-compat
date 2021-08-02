@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.6.4] - 2021-08-02
 ### Added
 - JSON progress for `6d6mseed` and `6d6read`.
 
