@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- JSON progress for `6d6mseed` and `6d6read`.
+
+### Changed
+- Updated leapsecond information according to Bulletin C 62 (2021-07-05).
 
 ## [1.6.3] - 2021-01-19
 ### Added
