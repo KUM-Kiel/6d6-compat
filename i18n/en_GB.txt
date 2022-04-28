@@ -150,6 +150,7 @@ Options
     %%L - Location
     %%C - Channel
     %%N - Network
+    %%j - Julian Day
 
   The default value is 'out/%%S/%%y-%%m-%%d-%%C.mseed'.
 
