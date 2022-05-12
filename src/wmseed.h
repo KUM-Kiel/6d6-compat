@@ -153,7 +153,7 @@ static char *wmseed__filename(WMSeed *w, Time t)
         s = wmseed__strappend(w, s, "%02d", d.sec);
         break;
       case 'j':
-        s = wmseed__strappend(w, s, "%03d", yday);
+        s = wmseed__strappend(w, s, "%03d", yday + 1);
         break;
       case 'S':
         s = wmseed__strappend(w, s, "%s", w->station);
