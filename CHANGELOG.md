@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Changed
+- Template option for julian day documented for `6d6mseed`.
+- Corrected an error in the julian day calculation.
 - Updated leapsecond information according to Bulletin C 64 (2022-07-05).
 
 ## [1.6.5] - 2022-01-31
