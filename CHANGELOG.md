@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.6.6] - 2022-08-01
 ### Changed
 - Template option for julian day documented for `6d6mseed`.
 - Corrected an error in the julian day calculation.
