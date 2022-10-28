@@ -217,4 +217,4 @@ Field    | Bytes | Data Type | Description
 ---------|-------|-----------|---------------
 id       | 4     | Int32     | The value 13.
 time     | 6     | BCD Time  | The time field of the second header.
-padding  | 2     | Byte      | 0-bytes.
+padding  | 6     | Byte      | 0-bytes.
