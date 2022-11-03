@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Corrected all leapseconds before the year 2000.
 
 ## [1.6.6] - 2022-08-01
 ### Changed
