@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Updated leapsecond information according to Bulletin C 65 (2023-01-09).
 ### Fixed
 - Corrected all leapseconds before the year 2000.
 
