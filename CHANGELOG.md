@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Updated leapsecond information according to Bulletin C 66 (2023-07-04).
 ### Fixed
 - Fixed a memory bug when using an invalid placeholder in the output template.
 
