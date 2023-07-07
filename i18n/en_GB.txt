@@ -19,6 +19,8 @@ Channel names must be between 1 and 3 alphanumeric characters.
 Too many channel names.
 ###need_name_for_every_channel
 When specifying channel names, you must give a name for every channel.
+###invalid_output_template_c
+Error in output template: %%%c is not a valid placeholder!
 ###processing_s
 Processing '%s'.
 ###out_of_memory

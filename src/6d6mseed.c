@@ -146,7 +146,7 @@ int main(int argc, char **argv)
   const char *filename = "-";
   uint32_t i, j;
   int c, e;
-  Time start_time, sync_time, skew_time = 0, t;
+  Time start_time, sync_time, skew_time = 0, t = 0;
   Date d;
   double skew = 1;
   int have_skew = 0;

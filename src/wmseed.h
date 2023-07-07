@@ -168,8 +168,8 @@ static char *wmseed__filename(WMSeed *w, Time t)
         s = wmseed__strappend(w, s, "%s", w->network);
         break;
       default:
-        free(s);
-        return 0;
+        wmseed__log(w, stderr, i18n->invalid_output_template_c, *tmpl >= 32 && *tmpl < 127 ? *tmpl : '?');
+        exit(1);
       }
     } else {
       s = wmseed__strappend(w, s, "%c", *tmpl);

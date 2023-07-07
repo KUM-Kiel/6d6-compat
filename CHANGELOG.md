@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Fixed a memory bug when using an invalid placeholder in the output template.
 
 ## [1.6.7] - 2023-01-31
 ### Changed

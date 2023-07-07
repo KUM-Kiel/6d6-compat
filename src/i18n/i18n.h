@@ -19,6 +19,7 @@ typedef struct {
   const char *invalid_channel_names;
   const char *invalid_cut;
   const char *invalid_end_time;
+  const char *invalid_output_template_c;
   const char *invalid_start_time;
   const char *invalid_station_code;
   const char *io_error;
@@ -94,6 +95,7 @@ static I18n _en_GB = {
   .invalid_channel_names = "Channel names must be between 1 and 3 alphanumeric characters.\n",
   .invalid_cut = "Invalid value for '--cut'.\n",
   .invalid_end_time = "Invalid value for '--end-time'.\n",
+  .invalid_output_template_c = "Error in output template: %%%c is not a valid placeholder!\n",
   .invalid_start_time = "Invalid value for '--start-time'.\n",
   .invalid_station_code = "Please specify a station code of 1 to 5 alphanumeric characters with --station=CODE.\n",
   .io_error = "I/O error!\n",
@@ -147,6 +149,7 @@ static I18n _de_DE = {
   .invalid_channel_names = "Kanalnamen müssen aus 1 bis 3 alphanumerischen Zeichen bestehen.\n",
   .invalid_cut = "Ungültiger Wert für '--cut'.\n",
   .invalid_end_time = "Ungültiger Wert für '--end-time'.\n",
+  .invalid_output_template_c = "Fehler im Output-Template: %%%c ist kein gültiger Platzhalter!\n",
   .invalid_start_time = "Ungültiger Wert für '--start-time'.\n",
   .invalid_station_code = "Bitte geben Sie einen Stationscode von 1 bis 5 alphanumerischen Zeichen mit\n--station=CODE an.\n",
   .io_error = "I/O-Fehler!\n",

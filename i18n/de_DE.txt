@@ -20,6 +20,8 @@ Kanalnamen müssen aus 1 bis 3 alphanumerischen Zeichen bestehen.
 Zu viele Kanalnamen angegeben.
 ###need_name_for_every_channel
 Es muss für jeden Kanal ein Name angegeben werden.
+###invalid_output_template_c
+Fehler im Output-Template: %%%c ist kein gültiger Platzhalter!
 ###processing_s
 Verarbeite '%s'.
 ###out_of_memory
