@@ -41,7 +41,7 @@ $ rake install
 ## Finding the device path of a StiK or SD card
 
 Several commands need the device path of a StiK or SD card.
-A device path normally looks like `/dev/sdb1`.
+A device path normally looks like `/dev/sdb`.
 
 ### Linux
 
@@ -59,7 +59,7 @@ $ sudo tail -f /var/log/syslog
 
 Now the StiK or SD card can be plugged in.
 Once it is detected by the computer, a message with the device path should appear in the terminal.
-The device path normally looks like `/dev/sdb1` but it could also be like `/dev/mmcblk0p1`.
+The device path normally looks like `/dev/sdb` but it could also be like `/dev/mmcblk0`.
 
 The message log can now be stopped with `Ctrl`+`C`.
 

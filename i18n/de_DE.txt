@@ -233,7 +233,7 @@ Informationen über eine .6d6-Datei auf der Festplatte anzeigen.
 Verwendung
 ----------
 
-  %s [Optionen] /dev/sdX1
+  %s [Optionen] /dev/sdX
 
 Der Parameter ist die Datei oder das Gerät, das untersucht werden soll.
 
@@ -247,9 +247,9 @@ Optionen
 Beispiele
 ---------
 
-Zeigt Informationen zum StiK in '/dev/sdb1':
+Zeigt Informationen zum StiK in '/dev/sdb':
 
-  $ 6d6info /dev/sdb1
+  $ 6d6info /dev/sdb
 
 Zeigt Informationen zur Datei 'station-007.6d6' im Ordner 'line-001':
 
@@ -268,11 +268,11 @@ beliebige Datenanalysen und Konvertierungen.
 Verwendung
 ----------
 
-  %s [Optionen] /dev/sdX1 out.6d6
+  %s [Optionen] /dev/sdX out.6d6
 
 Der erste Parameter ist die Quelldatei. Dies ist normalerweise der Gerätepfad
-des StiKs oder der SD-Karte und sieht ähnlich aus wie '/dev/sdb1' oder
-'/dev/mmcblk0p1'.
+des StiKs oder der SD-Karte und sieht ähnlich aus wie '/dev/sdb' oder
+'/dev/mmcblk0'.
 Der zweite Parameter ist der Dateiname, unter dem die Kopie gespeichert werden
 soll. Diese Datei sollte am besten die Endung '.6d6' haben, um sie als
 6D6-Rohdaten-Datei zu identifizieren.
@@ -306,13 +306,13 @@ Optionen
 Beispiele
 ---------
 
-Archiviert den StiK in '/dev/sdb1' auf eine Backup-Festplatte.
+Archiviert den StiK in '/dev/sdb' auf eine Backup-Festplatte.
 
-  $ 6d6copy /dev/sdb1 /media/Backup/Experiment-003/Station-007.6d6
+  $ 6d6copy /dev/sdb /media/Backup/Experiment-003/Station-007.6d6
 
-Kopiert die SD-Karte in '/dev/mmcblk0p1' ins aktuelle Verzeichnis.
+Kopiert die SD-Karte in '/dev/mmcblk0' ins aktuelle Verzeichnis.
 
-  $ 6d6copy /dev/mmcblk0p1 Station-013.6d6
+  $ 6d6copy /dev/mmcblk0 Station-013.6d6
 
 ###usage_6d6read_s
 6d6read

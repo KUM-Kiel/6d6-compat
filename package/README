@@ -21,11 +21,11 @@ Now you have the following commands.
 
   Use it as follows:
 
-    $ 6d6info /dev/sdX1
+    $ 6d6info /dev/sdX
 
-  This will show info for /dev/sdX1.
+  This will show info for /dev/sdX.
   Replace X with the proper drive letter.
-  On some systems this could also be /dev/mmcblk0p1 or similar.
+  On some systems this could also be /dev/mmcblk0 or similar.
 
 6d6copy
 -------
@@ -34,11 +34,11 @@ Now you have the following commands.
 
   Use it as follows:
 
-    $ 6d6copy /dev/sdX1 file.6d6
+    $ 6d6copy /dev/sdX file.6d6
 
-  This will copy the contents of /dev/sdX1 to file.6d6.
+  This will copy the contents of /dev/sdX to file.6d6.
   Replace X with the proper drive letter.
-  On some systems this could also be /dev/mmcblk0p1 or similar.
+  On some systems this could also be /dev/mmcblk0 or similar.
 
 6d6mseed
 --------

@@ -221,7 +221,7 @@ about a .6d6 file on your hard drive.
 Usage
 -----
 
-  %s [options] /dev/sdX1
+  %s [options] /dev/sdX
 
 The parameter is the file or device you want to inspect.
 
@@ -235,9 +235,9 @@ Options
 Examples
 --------
 
-Inspect the StiK in '/dev/sdb1':
+Inspect the StiK in '/dev/sdb':
 
-  $ 6d6info /dev/sdb1
+  $ 6d6info /dev/sdb
 
 Inspect the file 'station-007.6d6' in the directory 'line-001':
 
@@ -255,10 +255,10 @@ starting point for arbitrary data analysis methods.
 Usage
 -----
 
-  %s [options] /dev/sdX1 out.6d6
+  %s [options] /dev/sdX out.6d6
 
 The first argument is the source of the data. This is normally your
-StiK or SD card device like '/dev/sdb1' or '/dev/mmcblk0p1'.
+StiK or SD card device like '/dev/sdb' or '/dev/mmcblk0'.
 The second argument is the file to which the copy will be made.
 This file should have a .6d6 ending to identify it as 6D6 raw data.
 
@@ -289,13 +289,13 @@ Options
 Examples
 --------
 
-Archive the StiK in '/dev/sdb1' to a backup hard drive.
+Archive the StiK in '/dev/sdb' to a backup hard drive.
 
-  $ 6d6copy /dev/sdb1 /media/Backup/Experiment-003/Station-007.6d6
+  $ 6d6copy /dev/sdb /media/Backup/Experiment-003/Station-007.6d6
 
-Copy the SD card in '/dev/mmcblk0p1' to the current directory.
+Copy the SD card in '/dev/mmcblk0' to the current directory.
 
-  $ 6d6copy /dev/mmcblk0p1 Station-013.6d6
+  $ 6d6copy /dev/mmcblk0 Station-013.6d6
 
 ###usage_6d6read_s
 6d6read
