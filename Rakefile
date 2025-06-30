@@ -143,7 +143,7 @@ file 'src/i18n/i18n.h' => ['i18n/en_GB.txt', 'i18n/de_DE.txt', 'i18n.rb'] do
 end
 
 desc "Install everything."
-task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed'] do
+task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed', 'build/6d6strip'] do
   #system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
   system 'sudo install -m 4755 "build/6d6info" "/usr/local/bin/"'
   system 'sudo install -m 4755 "build/6d6copy" "/usr/local/bin/"'
