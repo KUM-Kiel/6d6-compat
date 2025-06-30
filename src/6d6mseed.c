@@ -479,7 +479,7 @@ int main(int argc, char **argv)
       }
     }
     if (progress == 1 && i % 1024 == 0) {
-      fprintf(stderr, "%3d%% %6.1fMB     \r", (int) (i * 100 / h_end.address), (double) i * 512 / 1000000l);
+      fprintf(stderr, "%5.1f%% %8.1fMB     \r", i * 100.0 / h_end.address, i * 512.0 / 1000000);
       fflush(stderr);
     } else if (progress == 2) {
       t2 = monotonic_time();
@@ -497,7 +497,7 @@ done:
     wmseed_destroy(channels[c]);
   }
   if (progress == 1) {
-    log_entry(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
+    log_entry(stderr, "%5.1f%% %8.1fMB     \n", 100.0, h_end.address * 512.0 / 1000000);
     fflush(stderr);
   } else if (progress == 2) {
     t2 = monotonic_time();
