@@ -19,6 +19,7 @@ typedef struct {
   int record_number;
   Time record_time;
   MiniSeedRecord record[1];
+  int record_valid;
   int data_pending;
   FILE *output;
   FILE *logfile;
@@ -42,6 +43,8 @@ int wmseed_time(WMSeed *w, Time t);
 int wmseed_start_time(WMSeed *w, Time t);
 // Limit the end time.
 int wmseed_end_time(WMSeed *w, Time t);
+// Mark samples as lost.
+int wmseed_lost_samples(WMSeed *w, int count);
 
 #endif
 
@@ -272,6 +275,7 @@ static void wmseed__flush(WMSeed *w)
       exit(1);
     }
     w->data_pending = 0;
+    w->record_valid = 0;
   }
 }
 
@@ -309,6 +313,7 @@ static void wmseed__new_record(WMSeed *w, Time t)
   w->record_number += 1;
   w->record_time = t;
   w->data_pending = 0;
+  w->record_valid = 1;
   miniseed_record_init(w->record, w->record_number);
   miniseed_record_set_info(w->record, w->station, w->location, w->channel, w->network);
   miniseed_record_set_sample_rate(w->record, w->sample_rate);
@@ -367,6 +372,11 @@ static int wmseed__time(WMSeed *w, Time t)
 
   while (w->sb->len && w->sb->sample_number <= w->sample_number) {
     sample = samplebuffer_pop(w->sb);
+    if (sample == 1 && !w->resampler) {
+      // Lost sample
+      wmseed__flush(w);
+      continue;
+    }
     tt = w->last_t + (int64_t) floor((w->sb->sample_number - w->last_sn - 1) * a);
     // Calculate cut section.
     if (w->cut) {
@@ -383,7 +393,7 @@ static int wmseed__time(WMSeed *w, Time t)
         }
       }
       if (w->first_file_created) {
-        while (miniseed_record_push_sample(w->record, sample) == -1) {
+        while (!w->record_valid || miniseed_record_push_sample(w->record, sample) == -1) {
           wmseed__new_record(w, tt);
         }
         w->data_pending = 1;
@@ -426,6 +436,15 @@ int wmseed_time(WMSeed *w, Time t)
   } else {
     return wmseed__time(w, t);
   }
+}
+
+int wmseed_lost_samples(WMSeed *w, int count)
+{
+  int i;
+  for (i = 0; i < count; ++i) {
+    wmseed__sample(w, 1);
+  }
+  return 0;
 }
 
 WMSeed *wmseed_new(FILE *logfile, const char *file_name_template, const char *station, const char *location, const char *channel, const char *network, double sample_rate, int64_t cut, int resampling)

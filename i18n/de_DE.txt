@@ -90,6 +90,8 @@ Unbekannte Option '--%s'.
 Unbekannte Option '-%c'.
 ###unexpected_argument_s
 Die Option '--%s' benötigt kein Argument.
+###lost_samples_d_ll
+%d verlorene Samples an Position 0x%llx.
 ###leapsec_outdated
 
 ############################################################

@@ -457,6 +457,10 @@ int main(int argc, char **argv)
             }
             break;
           case 7: /* Lost Frames */
+            log_entry(stderr, i18n->lost_samples_d_ll, (frame[2] >> 16) & 0xffff, i * 512ll);
+            for (c = 0; c < n_channels; ++c) {
+              wmseed_lost_samples(channels[c], (frame[2] >> 16) & 0xffff);
+            }
             break;
           case 9: /* Check Frame */
             break;

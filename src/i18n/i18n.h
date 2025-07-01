@@ -37,6 +37,7 @@ typedef struct {
   const char *label_start_time;
   const char *label_sync_time;
   const char *leapsec_outdated;
+  const char *lost_samples_d_ll;
   const char *malformed_6d6_header;
   const char *need_argument_long_s;
   const char *need_argument_short_c;
@@ -113,6 +114,7 @@ static I18n _en_GB = {
   .label_start_time = " Start Time:",
   .label_sync_time = "  Sync Time:",
   .leapsec_outdated = "\n############################################################\n#                     !!! WARNING !!!                      #\n#         The leapsecond information is outdated.          #\n#         Please download the newest release here:         #\n#      https://github.com/KUM-Kiel/6d6-compat/releases     #\n############################################################\n\n",
+  .lost_samples_d_ll = "Lost %d samples at file position 0x%llx.\n",
   .malformed_6d6_header = "Malformed 6D6 header!\n",
   .need_argument_long_s = "Option '--%s' needs an argument.\n",
   .need_argument_short_c = "Option '-%c' needs an argument.\n",
@@ -167,6 +169,7 @@ static I18n _de_DE = {
   .label_start_time = "  Startzeit:",
   .label_sync_time = "  Sync-Zeit:",
   .leapsec_outdated = "\n############################################################\n#                     !!! WARNUNG !!!                      #\n#  Die Schaltsekundeninformation ist nicht mehr aktuell.   #\n#    Bitte laden Sie die neuste Version hier herunter:     #\n#     https://github.com/KUM-Kiel/6d6-compat/releases      #\n############################################################\n\n",
+  .lost_samples_d_ll = "%d verlorene Samples an Position 0x%llx.\n",
   .malformed_6d6_header = "Beschädigter 6D6-Header!\n",
   .need_argument_long_s = "Die Option '--%s' benötigt ein Argument.\n",
   .need_argument_short_c = "Die Option '-%c' benötigt ein Argument.\n",

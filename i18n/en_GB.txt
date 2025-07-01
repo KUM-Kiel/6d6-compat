@@ -89,6 +89,8 @@ Unrecognised option '--%s'.
 Unrecognised option '-%c'.
 ###unexpected_argument_s
 Option '--%s' expects no argument.
+###lost_samples_d_ll
+Lost %d samples at file position 0x%llx.
 ###leapsec_outdated
 
 ############################################################
