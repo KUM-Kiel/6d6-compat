@@ -15,6 +15,7 @@ typedef struct {
   char *file_name_template;
   char *station, *location, *channel, *network;
   double sample_rate;
+  double measured_rate;
   Samplebuffer *sb;
   int record_number;
   Time record_time;
@@ -362,10 +363,25 @@ static int wmseed__time(WMSeed *w, Time t)
     return -1;
   }
 
-  if (w->sample_number - w->last_sn < 1008 * 20) {
+  int64_t delta_samples = w->sample_number - w->last_sn;
+  Time delta_time = t - w->last_t;
+
+  if (delta_samples < 1008 * 20) {
     // Don't use too many timestamps.
     return 0;
   }
+
+  double rate = delta_samples * 1e6 / delta_time;
+  double rate_error = (rate / w->measured_rate - 1) * 1e6;
+  if (rate_error < -0.5 || rate_error > 0.5) {
+    // Reject timestamps that have a high rate error.
+    if (delta_samples < 200000) {
+      // But don't make the gaps too large.
+      return 0;
+    }
+  }
+
+  w->measured_rate = rate;
 
   // Use linear interpolation.
   a = (double) (t - w->last_t) / (w->sample_number - w->last_sn);
@@ -460,6 +476,7 @@ WMSeed *wmseed_new(FILE *logfile, const char *file_name_template, const char *st
   w->channel = wmseed__strdup(w, channel);
   w->network = wmseed__strdup(w, network);
   w->sample_rate = sample_rate;
+  w->measured_rate = sample_rate;
   w->sb = samplebuffer_new();
   w->record_number = 0;
   w->record_time = 0;
