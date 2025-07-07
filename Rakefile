@@ -1,9 +1,8 @@
 require 'rake/c'
 
 machine = `#{C.cc} -dumpmachine`.strip
-strip = ENV['STRIP'] || 'strip'
 
-if machine.match(/darwin/)
+if machine.match(/darwin/) || machine.match(/macos/)
   C.cflags = '-Wall -Os'
   host = "mac"
 else
@@ -144,7 +143,6 @@ end
 
 desc "Install everything."
 task :install => ['build/6d6info', 'build/6d6copy', 'build/6d6read', 'build/6d6mseed', 'build/6d6strip'] do
-  #system 'strip build/6d6info build/6d6copy build/6d6read build/6d6mseed'
   system 'sudo install -m 4755 "build/6d6info" "/usr/local/bin/"'
   system 'sudo install -m 4755 "build/6d6copy" "/usr/local/bin/"'
   system 'sudo install -m 0755 "build/6d6read" "/usr/local/bin/"'
@@ -165,10 +163,5 @@ task :package => [
   system "mkdir '#{archive}'"
   system "cp build/6d6info build/6d6copy build/6d6read build/6d6mseed build/6d6strip package/6d6update package/install package/README LICENCE '#{archive}'"
   system "cp src/samplerate/COPYING '#{archive}/LICENCE-SRC'"
-  system "#{strip} '#{archive}/6d6info'"
-  system "#{strip} '#{archive}/6d6copy'"
-  system "#{strip} '#{archive}/6d6read'"
-  system "#{strip} '#{archive}/6d6mseed'"
-  system "#{strip} '#{archive}/6d6strip'"
   system "tar czf '#{archive}.tar.gz' '#{archive}'"
 end
