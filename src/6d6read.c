@@ -17,6 +17,7 @@
 #include "i18n_error.h"
 #include "monotonic-time.h"
 #include "tai.h"
+#include "progress.h"
 
 #define SAMPLE_TRACKER_IMPLEMENTATION
 #include "sample-tracker.h"
@@ -333,8 +334,7 @@ int main(int argc, char **argv)
       }
     }
     if (progress == 1 && i % 1024 == 0) {
-      fprintf(stderr, "%3d%% %6.1fMB     \r", (int) (i * 100 / h_end.address), (double) i * 512 / 1000000l);
-      fflush(stderr);
+      progress_update(i * 512ll, h_end.address * 512ll);
     } else if (progress == 2) {
       t2 = monotonic_time();
       if (t2 - t1 >= _50ms) {
@@ -358,8 +358,7 @@ done:
     return 1;
   }
   if (progress == 1) {
-    fprintf(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
-    fflush(stderr);
+    progress_complete(h_end.address * 512ll);
   } else if (progress == 2) {
     t2 = monotonic_time();
     fprintf(stderr,

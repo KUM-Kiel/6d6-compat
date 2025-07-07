@@ -15,6 +15,7 @@
 #include "tai.h"
 #include "i18n.h"
 #include "i18n_error.h"
+#include "progress.h"
 
 static const char *program = "6d6strip";
 static void help(const char *arg)
@@ -205,8 +206,7 @@ int main(int argc, char **argv)
       }
     }
     if (progress && i % 1024 == 0) {
-      fprintf(stderr, "%3d%% %6.1fMB     \r", (int) (i * 100 / h_end.address), (double) i * 512 / 1000000l);
-      fflush(stderr);
+      progress_update(i * 512ll, h_end.address * 512ll);
     }
   }
 done:
@@ -216,8 +216,7 @@ done:
     frame_counter = 0;
   }
   if (progress) {
-    fprintf(stderr, "%3d%% %6.1fMB     \n", 100, (double) h_end.address * 512 / 1000000l);
-    fflush(stderr);
+    progress_complete(h_end.address * 512ll);
   }
   return 0;
 }

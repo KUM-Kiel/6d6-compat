@@ -25,6 +25,7 @@
 #include "wmseed.h"
 #define RESAMPLER_IMPLEMENTATION
 #include "resampler.h"
+#include "progress.h"
 
 static FILE *_logfile = 0;
 static void log_entry(FILE *f, const char *format, ...)
@@ -483,8 +484,7 @@ int main(int argc, char **argv)
       }
     }
     if (progress == 1 && i % 1024 == 0) {
-      fprintf(stderr, "%5.1f%% %8.1fMB     \r", i * 100.0 / h_end.address, i * 512.0 / 1000000);
-      fflush(stderr);
+      progress_update(i * 512ll, h_end.address * 512ll);
     } else if (progress == 2) {
       t2 = monotonic_time();
       if (t2 - t1 >= _50ms) {
@@ -501,8 +501,7 @@ done:
     wmseed_destroy(channels[c]);
   }
   if (progress == 1) {
-    log_entry(stderr, "%5.1f%% %8.1fMB     \n", 100.0, h_end.address * 512.0 / 1000000);
-    fflush(stderr);
+    progress_complete(h_end.address * 512ll);
   } else if (progress == 2) {
     t2 = monotonic_time();
     fprintf(stdout,

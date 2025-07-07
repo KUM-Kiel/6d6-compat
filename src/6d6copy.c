@@ -11,6 +11,7 @@
 #include "i18n.h"
 #include "i18n_error.h"
 #include "monotonic-time.h"
+#include "progress.h"
 
 const char *program = "6d6copy";
 static void help(const char *arg)
@@ -153,9 +154,7 @@ int main(int argc, char **argv)
     if (m != l) io_error(3);
     n += m;
     if (progress == 1) {
-      fprintf(stderr, "%2$3d%% %1$6.1f MB        \r",
-        (double) n / 1000000,
-        (int) (100 * n / end));
+      progress_update(n, end);
     } else if (progress == 2) {
       t = monotonic_time();
       if (t - t1 >= _50ms) {
@@ -169,7 +168,7 @@ int main(int argc, char **argv)
   }
 
   if (progress == 1) {
-    fprintf(stderr, "%2$3d%% %1$6.1f MB        \n", (double) end / 1000000, 100);
+    progress_complete(end);
   } else if (progress == 2) {
     t = monotonic_time();
     fprintf(stdout,
