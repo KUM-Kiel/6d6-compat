@@ -2,9 +2,13 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.7.0] - 2025-07-22
 ### Changed
 - `6d6mseed` now rejects implausible timestamps.
 - Updated leapsecond information according to Bulletin C 70 (2025-07-07).
+### Fixed
+- Fixed an overflow in the progress output.
 
 ## [1.6.12] - 2025-01-24
 ### Changed
