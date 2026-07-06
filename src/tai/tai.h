@@ -73,8 +73,8 @@ static Time tai__leapsecs[] = {
   489024035000000,
   536544036000000,
 };
-static Time tai__last_valid = 852076837000000;
-static Time tai__next_update = 838857637000000;
+static Time tai__last_valid = 867715237000000;
+static Time tai__next_update = 854755237000000;
 
 int tai_leapsecs_valid(Time t)
 {
